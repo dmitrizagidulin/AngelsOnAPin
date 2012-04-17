@@ -2,10 +2,11 @@
 * GameState is the actual game play. We switch to it once user choses "Start game"
 *
 */
+	var game = {}
+	
 	function GameState() {
 		this.setup = function() {
 		}
-		
 		
 		this.draw = function() {
 			// Clear screen
@@ -36,7 +37,7 @@
 			jaws.context.clearRect(0,0,jaws.width,jaws.height)
 
 			// Draw Title
-			drawText(60, "Green", "New Game", 200, 150)
+			drawText(60, "Black", "New Game", 200, 150)
 
 		}
 	}
