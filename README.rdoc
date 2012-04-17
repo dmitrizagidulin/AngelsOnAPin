@@ -1,0 +1,5 @@
+= New Game
+
+== Frameworks
+Uses:
+* http://jawsjs.com/ JawsJS game framework
