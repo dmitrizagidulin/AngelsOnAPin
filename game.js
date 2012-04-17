@@ -6,6 +6,7 @@
 	
 	function GameState() {
 		this.setup = function() {
+			jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
 		}
 		
 		this.draw = function() {
