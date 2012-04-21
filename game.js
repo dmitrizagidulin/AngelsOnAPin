@@ -8,7 +8,8 @@ var game = {
 	gameAreaMinX: 10,
 	gameAreaMaxX: 890,
 	gameAreaMinY: 10,
-	gameAreaMaxY: 490
+	gameAreaMaxY: 490,
+	gravity: 0.02
 }
 var direction_keys = {
 		left : {
@@ -28,6 +29,7 @@ var direction_keys = {
 			y : 1
 		}
 }
+
 function isOutsideCanvas(item) {
 	return (item.x < game.gameAreaMinX || item.y < game.gameAreaMinY
 			|| item.x > game.gameAreaMaxX || item.y > game.gameAreaMaxY)
@@ -56,8 +58,9 @@ function Projectile(options) {
 	Thing.call(this, options) // Use parent's constructor
 	this.startX = options.x
 	this.startY = options.y
-	this.speed = options.speed
+	this.speed_vector = options.speed_vector
 	this.range = options.range
+	this.affectedByGravity = options.affectedByGravity
 	this.collision = false
 }
 Object.extend(Projectile, Thing)
@@ -72,19 +75,24 @@ Projectile.prototype.isAlive = function() {
 Projectile.prototype.isInRange = function() {
 	return this.rect().x < (this.startX + this.range)
 }
+Projectile.prototype.move = function() {
+	if(this.affectedByGravity) {
+		this.speed_vector.y += game.gravity
+	}
+	this.rect().x += this.speed_vector.x
+	this.rect().y += this.speed_vector.y
+}
+Projectile.prototype.update = function() {
+	this.move()
+}
 
 Projectile.isOutsideRange = function(item) {
 	return !item.isInRange()
 }
-
 function Star(options) {
 	Projectile.call(this, options)
 	this.draw = function() {
 		drawText(20, 'White', '*', this.rect().x, this.rect().y)
-	}
-	this.update = function() {
-		dxdy = direction_keys['right']
-		this.move(dxdy)
 	}
 }
 Object.extend(Star, Projectile)
@@ -95,10 +103,6 @@ function Dash(options) {
 	this.draw = function() {
 		drawText(20, 'Teal', '-', this.rect().x, this.rect().y)
 	}
-	this.update = function() {
-		dxdy = direction_keys['right']
-		this.move(dxdy)
-	}
 }
 Object.extend(Dash, Projectile)
 
@@ -108,12 +112,14 @@ function Weapon(options) {
 	this.range = options.range
 	this.cooldown = options.cooldown
 	this.projectileType = options.projectileType
+	this.affectedByGravity = options.affectedByGravity
 	
 	this.projectile = function(owner) {
 		var projectile = new this.projectileType({
 			x : owner.rect().right,
 			y : owner.y,
-			speed: this.speed,
+			speed_vector: {x: this.speed, y: 0},
+			affectedByGravity: this.affectedByGravity,
 			range: this.range
 		})
 		return projectile
@@ -121,8 +127,20 @@ function Weapon(options) {
 }
 
 var allWeapons = {
-	StarWeapon: new Weapon({speed: 2, range: 50, cooldown: 300, projectileType: Star}),
-	DashWeapon: new Weapon({speed: 3, range: 500, cooldown: 300, projectileType: Dash})
+	StarWeapon : new Weapon({
+		speed : 2,
+		range : 50,
+		cooldown : 300,
+		affectedByGravity: false,
+		projectileType : Star
+	}),
+	DashWeapon : new Weapon({
+		speed : 3,
+		range : 500,
+		cooldown : 300,
+		affectedByGravity: true,
+		projectileType : Dash
+	})
 }
 
 function Player(options) {
