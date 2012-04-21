@@ -93,7 +93,36 @@ function GameState() {
 		jaws.context.strokeRect(x, y, width, height)
 	}
 
+	this.direction_keys = {
+		left : {
+			x : -1,
+			y : 0
+		},
+		right : {
+			x : 1,
+			y : 0
+		},
+		up : {
+			x : 0,
+			y : -1
+		},
+		down : {
+			x : 0,
+			y : 1
+		}
+	}
+	
 	this.update = function() {
+		var player = game.player
+		var dxdy
+		if (jaws.pressed("left")) {
+			dxdy = this.direction_keys['left']
+			player.move(dxdy)
+		}
+		if (jaws.pressed("right")) {
+			dxdy = this.direction_keys['right']
+			player.move(dxdy)
+		}
 	}
 }
 
