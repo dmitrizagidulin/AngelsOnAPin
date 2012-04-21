@@ -1,12 +1,10 @@
 var game = {
 	creatureHeight: 17,
 	playerSpeed: 2,
-	projectileSpeed: 2,
 	groundX: 200,
 	groundY: 330,
 	groundWidth: 450,
 	groundHeight: 10,
-	projectileCooldown: 300,
 	gameAreaMinX: 10,
 	gameAreaMaxX: 890,
 	gameAreaMinY: 10,
@@ -55,18 +53,8 @@ function Projectile(options) {
 	Thing.call(this, options) // Use parent's constructor
 	this.startX = options.x
 	this.startY = options.y
-	this.speed = game.projectileSpeed
-	
+	this.speed = options.speed
 	this.range = options.range
-	
-	this.draw = function() {
-		drawText(20, 'White', '*', this.rect().x, this.rect().y)
-	}
-	
-	this.update = function() {
-		dxdy = direction_keys['right']
-		this.move(dxdy)
-	}
 }
 Object.extend(Projectile, Thing)
 
@@ -78,7 +66,38 @@ Projectile.isOutsideRange = function(item) {
 	return !item.isInRange()
 }
 
+function Star(options) {
+	Projectile.call(this, options)
+	
+	this.range = 50
+	
+	this.draw = function() {
+		drawText(20, 'White', '*', this.rect().x, this.rect().y)
+	}
+	
+	this.update = function() {
+		dxdy = direction_keys['right']
+		this.move(dxdy)
+	}
+}
+Object.extend(Star, Projectile)
 
+function WeaponStar() {
+	this.speed = 2
+	this.range = 50
+	this.cooldown = 300
+	
+	this.projectile = function(owner) {
+		var projectile = new Star({
+			x : owner.rect().right,
+			y : owner.y,
+			speed: this.speed,
+			range: this.range
+		})
+		projectile.collision = false
+		return projectile
+	}
+}
 
 function Player(options) {
 	options.x = game.groundX + 10
@@ -87,7 +106,6 @@ function Player(options) {
 	Thing.call(this, options) // Use parent's constructor
 
 	this.speed = options.speed
-	
 	
 	this.draw = function() {
 		drawText(20, 'White', 'A', this.rect().x, this.rect().y)
@@ -131,6 +149,7 @@ function GameState() {
 			speed: game.playerSpeed
 		})
 		game.player.can_fire = true
+		game.player.weapon = new WeaponStar()
 	}
 
 	this.draw = function() {
@@ -169,16 +188,13 @@ function GameState() {
 		}
 		if (jaws.pressed("space")) {
 			if(player.can_fire) {
-				bullet = new Projectile({x: player.rect().right, y:player.y, range:50})
-				bullet.collision = false
-
+				bullet = player.weapon.projectile(player)
 				playerProjectiles.push(bullet)
 				player.can_fire = false
-				setTimeout(function() { game.player.can_fire = true }, game.projectileCooldown)
+				setTimeout(function() { game.player.can_fire = true }, game.player.weapon.cooldown)
 			}
 		}
 		playerProjectiles.update()
-		
 		playerProjectiles.removeIf(Projectile.isOutsideRange)
 	}
 }
