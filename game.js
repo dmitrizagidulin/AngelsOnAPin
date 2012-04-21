@@ -48,6 +48,9 @@ Thing.prototype.move = function(dxdy) {
 Thing.prototype.rect = function() {
 	return this.my_rect;
 }
+Thing.isDead = function(item) {
+	return !item.isAlive()
+}
 
 function Projectile(options) {
 	Thing.call(this, options) // Use parent's constructor
@@ -55,9 +58,17 @@ function Projectile(options) {
 	this.startY = options.y
 	this.speed = options.speed
 	this.range = options.range
+	this.collision = false
 }
 Object.extend(Projectile, Thing)
 
+Projectile.prototype.doCollideWith = function(thing) {
+	this.collision = true
+}
+
+Projectile.prototype.isAlive = function() {
+	return !this.collision
+}
 Projectile.prototype.isInRange = function() {
 	return this.rect().x < (this.startX + this.range)
 }
@@ -105,7 +116,6 @@ function Weapon(options) {
 			speed: this.speed,
 			range: this.range
 		})
-		projectile.collision = false
 		return projectile
 	}
 }
@@ -116,7 +126,7 @@ var allWeapons = {
 }
 
 function Player(options) {
-	options.x = game.groundX + 10
+	options.x += game.groundX
 	options.y = game.groundY
 
 	Thing.call(this, options) // Use parent's constructor
@@ -130,11 +140,14 @@ function Player(options) {
 Object.extend(Player, Thing)
 
 function Enemy(options) {
-
+	options.x += game.groundX
+	options.y = game.groundY
 	Thing.call(this, options) // Use parent's constructor
-
+	
+	this.collision = false
+	
 	this.draw = function() {
-		drawText(17, 'Red', 'A', this.rect().x, this.rect().y)
+		drawText(20, 'Red', 'A', this.rect().x, this.rect().y)
 		// draw collision rect
 		square_side = this.height
 		jaws.context.lineWidth = 0.5
@@ -145,13 +158,21 @@ function Enemy(options) {
 }
 Object.extend(Enemy, Thing)
 
+Enemy.prototype.doCollideWith = function(thing) {
+	this.collision = true
+}
+
+Enemy.prototype.isAlive = function() {
+	return !this.collision
+}
+
 /**
  * GameState is the actual game play. We switch to it once user choses "Start game"
  *
  */
-
 function GameState() {
 	var playerProjectiles = new jaws.SpriteList()
+	var enemies = new jaws.SpriteList()
 	
 	this.setup = function() {
 		jaws.on_keydown("esc", function() {
@@ -161,11 +182,15 @@ function GameState() {
 		
 		game.player = new Player({
 			x : 20,
-			y : 20,
 			speed: game.playerSpeed
 		})
 		game.player.can_fire = true
 		game.player.weapon = allWeapons.DashWeapon
+		
+		enemy = new Enemy({
+			x: 300
+		})
+		enemies.push(enemy)
 	}
 
 	this.draw = function() {
@@ -175,6 +200,7 @@ function GameState() {
 
 		this.drawGround()
 		game.player.draw()
+		enemies.draw()
 		playerProjectiles.draw()
 	}
 
@@ -212,6 +238,15 @@ function GameState() {
 		}
 		playerProjectiles.update()
 		playerProjectiles.removeIf(Projectile.isOutsideRange)
+		
+		jaws.collideManyWithMany(playerProjectiles, enemies).forEach( function(pair, index) {
+			bullet = pair[0]
+			enemy = pair[1]
+			bullet.doCollideWith(enemy)
+			enemy.doCollideWith(bullet)
+		});
+		playerProjectiles.removeIf(Thing.isDead)
+		enemies.removeIf(Thing.isDead)
 	}
 }
 
