@@ -68,13 +68,9 @@ Projectile.isOutsideRange = function(item) {
 
 function Star(options) {
 	Projectile.call(this, options)
-	
-	this.range = 50
-	
 	this.draw = function() {
 		drawText(20, 'White', '*', this.rect().x, this.rect().y)
 	}
-	
 	this.update = function() {
 		dxdy = direction_keys['right']
 		this.move(dxdy)
@@ -82,13 +78,28 @@ function Star(options) {
 }
 Object.extend(Star, Projectile)
 
-function WeaponStar() {
-	this.speed = 2
-	this.range = 50
-	this.cooldown = 300
+function Dash(options) {
+	options.y -= 4  // Nudge the height of the dash slightly upward
+	Projectile.call(this, options)
+	this.draw = function() {
+		drawText(20, 'Teal', '-', this.rect().x, this.rect().y)
+	}
+	this.update = function() {
+		dxdy = direction_keys['right']
+		this.move(dxdy)
+	}
+}
+Object.extend(Dash, Projectile)
+
+
+function Weapon(options) {
+	this.speed = options.speed
+	this.range = options.range
+	this.cooldown = options.cooldown
+	this.projectileType = options.projectileType
 	
 	this.projectile = function(owner) {
-		var projectile = new Star({
+		var projectile = new this.projectileType({
 			x : owner.rect().right,
 			y : owner.y,
 			speed: this.speed,
@@ -97,6 +108,11 @@ function WeaponStar() {
 		projectile.collision = false
 		return projectile
 	}
+}
+
+var allWeapons = {
+	StarWeapon: new Weapon({speed: 2, range: 50, cooldown: 300, projectileType: Star}),
+	DashWeapon: new Weapon({speed: 3, range: 500, cooldown: 300, projectileType: Dash})
 }
 
 function Player(options) {
@@ -149,7 +165,7 @@ function GameState() {
 			speed: game.playerSpeed
 		})
 		game.player.can_fire = true
-		game.player.weapon = new WeaponStar()
+		game.player.weapon = allWeapons.DashWeapon
 	}
 
 	this.draw = function() {
