@@ -9,8 +9,10 @@ var game = {
 	gameAreaMaxX: 890,
 	gameAreaMinY: 10,
 	gameAreaMaxY: 490,
-	gravity: 0.02
+	gravity: 0.01
 }
+game.ground = new Thing({x: game.groundX, y: game.groundY, width: game.groundWidth, height: game.groundHeight})
+
 var direction_keys = {
 		left : {
 			x : -1,
@@ -38,10 +40,25 @@ function isOutsideCanvas(item) {
 function Thing(options) {
 	this.x = options.x
 	this.y = options.y
-	this.height = game.creatureHeight
-	this.my_rect = new jaws.Rect(this.x, this.y, this.height, this.height);
-	this.speed = 1
+	this.height = options.height
+	this.width = options.width
+	
+	if(!this.height) {
+		this.height = game.creatureHeight
+	}
+	if(!this.width) {
+		this.width = this.height
+	}
+	this.my_rect = new jaws.Rect(this.x, this.y, this.width, this.height);
+	this.speed = 0
 }
+Thing.prototype.drawRect = function() {
+	jaws.context.strokeStyle = "white"
+	jaws.context.lineWidth = 1
+	jaws.context.strokeRect(this.rect().x, this.rect().y, this.rect().width,
+			this.rect().height)
+}
+
 Thing.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
@@ -69,6 +86,11 @@ Projectile.prototype.doCollideWith = function(thing) {
 	this.collision = true
 }
 
+Projectile.prototype.hasHitGround = function() {
+	hasHitGround = jaws.collideOneWithOne(this, game.ground)
+	return hasHitGround
+}
+
 Projectile.prototype.isAlive = function() {
 	return !this.collision
 }
@@ -79,29 +101,34 @@ Projectile.prototype.move = function() {
 	if(this.affectedByGravity) {
 		this.speed_vector.y += game.gravity
 	}
-	this.rect().x += this.speed_vector.x
-	this.rect().y += this.speed_vector.y
+	this.rect().move(this.speed_vector.x, this.speed_vector.y)
+//	this.rect().x += this.speed_vector.x
+//	this.rect().y += this.speed_vector.y
 }
 Projectile.prototype.update = function() {
 	this.move()
 }
 
 Projectile.isOutsideRange = function(item) {
-	return !item.isInRange()
+	isOutsideRange = !item.isInRange() || item.hasHitGround()
+	return isOutsideRange
 }
 function Star(options) {
+	options.height = 13
+	options.width = 13
 	Projectile.call(this, options)
 	this.draw = function() {
-		drawText(20, 'White', '*', this.rect().x, this.rect().y)
+		drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
 	}
 }
 Object.extend(Star, Projectile)
 
 function Dash(options) {
-	options.y -= 4  // Nudge the height of the dash slightly upward
+	options.height = 4
+	options.width = 14
 	Projectile.call(this, options)
 	this.draw = function() {
-		drawText(20, 'Teal', '-', this.rect().x, this.rect().y)
+		drawText(20, 'Teal', '-', this.rect().x - 1, this.rect().bottom + 5)
 	}
 }
 Object.extend(Dash, Projectile)
@@ -145,33 +172,27 @@ var allWeapons = {
 
 function Player(options) {
 	options.x += game.groundX
-	options.y = game.groundY
+	options.y = game.groundY - (game.groundHeight * 2) + 1
 
 	Thing.call(this, options) // Use parent's constructor
 
 	this.speed = options.speed
 	
 	this.draw = function() {
-		drawText(20, 'White', 'A', this.rect().x, this.rect().y)
+		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
 	}
 }
 Object.extend(Player, Thing)
 
 function Enemy(options) {
 	options.x += game.groundX
-	options.y = game.groundY
+	options.y = game.groundY - (game.groundHeight * 2) + 1
 	Thing.call(this, options) // Use parent's constructor
 	
 	this.collision = false
 	
 	this.draw = function() {
-		drawText(20, 'Red', 'A', this.rect().x, this.rect().y)
-		// draw collision rect
-		square_side = this.height
-		jaws.context.lineWidth = 0.5
-		jaws.context.strokeStyle = "gray"
-		jaws.context.strokeRect(this.rect().x, this.rect().y - this.height,
-				square_side, square_side)
+		drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
 	}
 }
 Object.extend(Enemy, Thing)
@@ -191,6 +212,13 @@ Enemy.prototype.isAlive = function() {
 function GameState() {
 	var playerProjectiles = new jaws.SpriteList()
 	var enemies = new jaws.SpriteList()
+//	var test = new Star({
+//		x : 100,
+//		y : 100,
+//		speed_vector: {x: 2, y: 0},
+//		affectedByGravity: false,
+//		range: 30
+//	})
 	
 	this.setup = function() {
 		jaws.on_keydown("esc", function() {
@@ -203,7 +231,7 @@ function GameState() {
 			speed: game.playerSpeed
 		})
 		game.player.can_fire = true
-		game.player.weapon = allWeapons.DashWeapon
+		game.player.weapon = allWeapons.StarWeapon
 		
 		enemy = new Enemy({
 			x: 300
@@ -223,16 +251,11 @@ function GameState() {
 	}
 
 	this.drawGround = function() {
-		var x = game.groundX
-		var y = game.groundY
-		var height = game.groundHeight
-		var width = game.groundWidth
-
 		jaws.context.strokeStyle = "white"
 		jaws.context.fillStyle = "blue"
 		jaws.context.lineWidth = 1
-		jaws.context.fillRect(x, y, width, height)
-		jaws.context.strokeRect(x, y, width, height)
+		jaws.context.fillRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
+		jaws.context.strokeRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
 	}
 	
 	this.update = function() {
@@ -257,6 +280,9 @@ function GameState() {
 		playerProjectiles.update()
 		playerProjectiles.removeIf(Projectile.isOutsideRange)
 		
+//		jaws.collideOneWithMany(game.ground, playerProjectiles).forEach( function(bullet) {
+////				bullet.doCollideWith(game.ground)
+//		})
 		jaws.collideManyWithMany(playerProjectiles, enemies).forEach( function(pair, index) {
 			bullet = pair[0]
 			enemy = pair[1]
