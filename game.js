@@ -9,7 +9,7 @@ var game = {
 	gameAreaMaxX: 890,
 	gameAreaMinY: 10,
 	gameAreaMaxY: 490,
-	gravity: 0.01
+	gravity: 0.06
 }
 game.ground = new Thing({x: game.groundX, y: game.groundY, width: game.groundWidth, height: game.groundHeight})
 
@@ -141,13 +141,15 @@ function Weapon(options) {
 	this.projectileType = options.projectileType
 	this.affectedByGravity = options.affectedByGravity
 	
+	this.speed = 1
+	
 	this.projectile = function(owner) {
 		var projectile = new this.projectileType({
-			x : owner.rect().right,
+			x : owner.rect().right - (owner.rect().width / 2),
 			y : owner.y,
-			speed_vector: {x: this.speed, y: 0},
-			affectedByGravity: this.affectedByGravity,
-			range: this.range
+			speed_vector: {x: this.speed, y: -4},
+			affectedByGravity: true, //this.affectedByGravity,
+			range: 600 //this.range
 		})
 		return projectile
 	}
@@ -172,31 +174,57 @@ var allWeapons = {
 
 function Player(options) {
 	options.x += game.groundX
-	options.y = game.groundY - (game.groundHeight * 2) + 1
-
+	options.y = game.groundY - 25 
+	options.width = 50
+	options.height = 51
 	Thing.call(this, options) // Use parent's constructor
 
+	this.sprite = new jaws.Sprite({image: "angel2_50.png", x: options.x, y: options.y,
+		anchor: "center"});
+	
 	this.speed = options.speed
 	
 	this.draw = function() {
-		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
+//		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
+		this.sprite.draw()
 	}
 }
 Object.extend(Player, Thing)
+Player.prototype.move = function(dxdy) {
+	dx = dxdy.x * this.speed
+	dy = dxdy.y * this.speed
+	this.sprite.move(dx, dy);
+}
+Player.prototype.rect = function() {
+	return this.sprite.rect()
+}
 
 function Enemy(options) {
 	options.x += game.groundX
-	options.y = game.groundY - (game.groundHeight * 2) + 1
+	options.y = game.groundY - 25
+	options.width = 50
+	options.height = 48
 	Thing.call(this, options) // Use parent's constructor
+	
+	this.sprite = new jaws.Sprite({image: "angel3_50.png", x: options.x, y: options.y,
+		anchor: "center"});
 	
 	this.collision = false
 	
 	this.draw = function() {
-		drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
+//		drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
+		this.sprite.draw()
 	}
 }
 Object.extend(Enemy, Thing)
-
+Enemy.prototype.move = function(dxdy) {
+	dx = dxdy.x * this.speed
+	dy = dxdy.y * this.speed
+	this.sprite.move(dx, dy);
+}
+Enemy.prototype.rect = function() {
+	return this.sprite.rect()
+}
 Enemy.prototype.doCollideWith = function(thing) {
 	this.collision = true
 }
@@ -241,7 +269,7 @@ function GameState() {
 
 	this.draw = function() {
 		// Clear screen
-		jaws.context.fillStyle = "black"
+		jaws.context.fillStyle = "#011451"
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 
 		this.drawGround()
@@ -327,10 +355,16 @@ function MenuState() {
 	}
 }
 
+function initAssets() {
+	jaws.assets.add("angel2_50.png")
+	jaws.assets.add("angel3_50.png")
+}
+
 /**
  * Our script-entry point
  *
  */
 window.onload = function() {
+	initAssets()
 	jaws.start(MenuState)
 }
