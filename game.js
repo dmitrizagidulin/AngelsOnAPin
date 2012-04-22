@@ -10,7 +10,8 @@ var game = {
 	gameAreaMaxX: 890,
 	gameAreaMinY: 10,
 	gameAreaMaxY: 490,
-	gravity: 0.06
+	gravity: 0.06,
+	backgroundColor: "#011451"
 }
 game.ground = new Thing({x: game.groundX, y: game.groundY, width: game.groundWidth, height: game.groundHeight})
 
@@ -355,7 +356,7 @@ function GameState() {
 
 	this.draw = function() {
 		// Clear screen
-		jaws.context.fillStyle = "#011451"
+		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 //		jaws.context.globalAlpha = 0.25
 		background.draw()
@@ -437,11 +438,12 @@ function MenuState() {
 	}
 
 	this.draw = function() {
-		jaws.context.clearRect(0, 0, jaws.width, jaws.height)
+		jaws.context.fillStyle = game.backgroundColor
+		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 
 		// Draw Title
-		drawText(45, "Black", "Angels on a Pin", 150, 150)
-		drawText(20, "Black", "[Enter]", 350, 300)
+		drawText(45, "White", "Angels on a Pin", 150, 150)
+		drawText(20, "White", "[Enter]", 350, 300)
 	}
 }
 
