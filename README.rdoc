@@ -1,4 +1,8 @@
-= New Game
+= Angels on the Head of a Pin
+You've heard the question - "How many angels can dance on the head of a pin?" 
+The answer: THERE CAN BE ONLY ONE.
+
+A Ludum Dare 23 entry.
 
 == Frameworks
 Uses:
