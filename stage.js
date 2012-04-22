@@ -59,7 +59,8 @@ function Stage(id, data, stageList) {
 function StageList() {
 	this.currentStageIdx = 0
 	this.stages = {
-		1: 'One'
+		1: 'One',
+		2: 'Two'
 	}
 	this.stageData = {
 		'One':{
@@ -69,6 +70,13 @@ function StageList() {
 				}
 			}
 		},
+		'Two':{
+			'levels':{
+				1: {
+					'enemies': ['red_angel']
+				}
+			}
+		}
 	}
 	this.currentStageObj = null
 	this.stagesCleared = {}
@@ -137,6 +145,14 @@ function StageList() {
 	}
 
 	this.allStagesClear = function() {
-		return (stageList.stagesCleared['One'] == 1)
+		var cleared = true
+		var stageId = null
+		for(i in this.stages) {
+			stageId = this.stages[i]
+			if(!stageList.stagesCleared[stageId]) {
+				cleared = false
+			}
+		}
+		return cleared
 	}
 }

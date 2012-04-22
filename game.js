@@ -456,6 +456,7 @@ function GameState() {
 function MenuState() {
 	this.setup = function() {
 		game.stageList.resetStages()
+		console.log('In MenuState, all stages reset')
 		index = 0
 		jaws.on_keydown([ "down", "s" ], function() {
 			index++;
@@ -498,10 +499,12 @@ function StageReadyState() {
 		
 		var result = stageList.nextStage()
 		if(result) {
+			console.log('In StageReadyState. Next stage selected: Chapter '+game.stageList.currentStageId())
 			jaws.on_keydown(["enter"],  function()  {
 				jaws.switchGameState(GameState) 
 			})
 		} else {
+			console.log('In StageReadyStage. No more stages')
 			// No more stages
 		}
 	}
