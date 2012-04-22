@@ -385,6 +385,7 @@ function GameState() {
 		enemies.update()
 
 		jaws.collideOneWithMany(player, enemies).forEach(function(enemy) {
+			playSoundTag('sizzle')
 			console.log(player.name() + ' collided with ' + enemy.name())
 			var touchDamage = enemy.damageTo(player)
 			player.takeDamageFrom(touchDamage, enemy)
@@ -424,6 +425,7 @@ function MenuState() {
 			}
 		})
 		jaws.on_keydown([ "enter" ], function() {
+			stopSound('start')
 			jaws.switchGameState(StageReadyState)
 		})
 	}
@@ -439,9 +441,6 @@ function MenuState() {
 }
 
 function StageReadyState() {
-	var index = 0
-	var items = []
-
 	this.setup = function() {
 		playSoundTag('horn')
 		
@@ -451,6 +450,7 @@ function StageReadyState() {
 		}
 		jaws.preventDefaultKeys([ "enter", "esc" ])
 		jaws.on_keydown("esc", function() {
+			stopSound('horn')
 			jaws.switchGameState(MenuState)
 		})
 
@@ -459,6 +459,7 @@ function StageReadyState() {
 			console.log('In StageReadyState. Next stage selected: Chapter '
 					+ game.stageList.currentStageId())
 			jaws.on_keydown([ "enter" ], function() {
+				stopSound('horn')
 				jaws.switchGameState(GameState)
 			})
 		} else {

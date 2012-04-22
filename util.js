@@ -16,8 +16,11 @@
 	
 function playSoundTag(tagId) {
 	var tag = document.getElementById(tagId)
-	if(tag) {
-		tag.currentTime = 0
-		tag.play()
-	}
+	tag.currentTime = 0
+	tag.play()
+}
+function stopSound(tagId) {
+	var tag = document.getElementById(tagId)
+	tag.pause()
+	tag.currentTime = 0
 }
