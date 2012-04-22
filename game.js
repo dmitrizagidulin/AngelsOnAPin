@@ -74,12 +74,11 @@ Thing.prototype.move = function(dxdy) {
 	}
 }
 Thing.prototype.rect = function() {
-//	if(this.sprite) {
-//		return this.sprite.rect()
-//	} else {
-//		return this.my_rect;
-//	}
-	return this.my_rect;
+	if(this.sprite) {
+		return this.sprite.rect()
+	} else {
+		return this.my_rect;
+	}
 }
 Thing.isDead = function(item) {
 	return !item.isAlive()
@@ -132,21 +131,17 @@ Projectile.isOutsideRange = function(item) {
 	return isOutsideRange
 }
 function Seal(options) {
-	options.height = 13
-	options.width = 13
+	options.height = 49
+	options.width = 49  // sprite 
+	options.y = game.ground.rect().y - options.height - 1
 	this.sprite = new jaws.Sprite({image: "seal1.png", x: options.x, y: options.y});
 	Projectile.call(this, options)
 	this.draw = function() {
 //		drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
 		this.sprite.draw()
-		this.drawRect()
 	}
 }
 Object.extend(Seal, Projectile)
-
-Seal.prototype.isAlive = function() {
-	return true
-}
 
 function Dash(options) {
 	options.height = 4
@@ -181,7 +176,7 @@ function Weapon(options) {
 	this.projectile = function(owner) {
 		var projectile = new this.projectileType({
 			x : owner.rect().right - (owner.rect().width / 2),
-			y : owner.y,
+//			y : owner.y,
 			speed_vector: {x: this.speed, y: -4},
 			affectedByGravity: true, //this.affectedByGravity,
 			range: 600 //this.range
