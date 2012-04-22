@@ -1,38 +1,43 @@
-
 var game = {
-	creatureHeight: 17,
-	playerSpeed: 2,
-	groundX: 200,
-	groundY: 310,
-	groundWidth: 490,
-	groundHeight: 10,
-	gameAreaMinX: 10,
-	gameAreaMaxX: 890,
-	gameAreaMinY: 10,
-	gameAreaMaxY: 490,
-	gravity: 0.06,
-	backgroundColor: "#011451",
-	stageList: new StageList()  // see stage.js
+	creatureHeight : 17,
+	playerSpeed : 2,
+	groundX : 200,
+	groundY : 310,
+	groundWidth : 490,
+	groundHeight : 10,
+	gameAreaMinX : 10,
+	gameAreaMaxX : 890,
+	gameAreaMinY : 10,
+	gameAreaMaxY : 490,
+	gravity : 0.06,
+	backgroundColor : "#011451",
+	stageList : new StageList()
+// see stage.js
 }
-game.ground = new Thing({x: game.groundX, y: game.groundY, width: game.groundWidth, height: game.groundHeight})
+game.ground = new Thing({
+	x : game.groundX,
+	y : game.groundY,
+	width : game.groundWidth,
+	height : game.groundHeight
+})
 
 var direction_keys = {
-		left : {
-			x : -1,
-			y : 0
-		},
-		right : {
-			x : 1,
-			y : 0
-		},
-		up : {
-			x : 0,
-			y : -1
-		},
-		down : {
-			x : 0,
-			y : 1
-		}
+	left : {
+		x : -1,
+		y : 0
+	},
+	right : {
+		x : 1,
+		y : 0
+	},
+	up : {
+		x : 0,
+		y : -1
+	},
+	down : {
+		x : 0,
+		y : 1
+	}
 }
 
 function isOutsideCanvas(item) {
@@ -46,33 +51,36 @@ function Thing(options) {
 	this.height = options.height
 	this.width = options.width
 	this.hp = options.hp || 0
-	
-	if(!this.height) {
+
+	if (!this.height) {
 		this.height = game.creatureHeight
 	}
-	if(!this.width) {
+	if (!this.width) {
 		this.width = this.height
 	}
 	this.my_rect = new jaws.Rect(this.x, this.y, this.width, this.height);
 	this.speed = 0
 }
 Thing.prototype.drawRect = function() {
-	if(this.sprite) {
+	if (this.sprite) {
 		this.sprite.rect().draw()
 	} else {
 		jaws.context.strokeStyle = "white"
 		jaws.context.lineWidth = 1
-		jaws.context.strokeRect(this.rect().x, this.rect().y, this.rect().width,
-				this.rect().height)
+		jaws.context.strokeRect(this.rect().x, this.rect().y,
+				this.rect().width, this.rect().height)
 	}
 }
 Thing.prototype.knockBack = function(dx) {
-	this.move({x: -dx, y:0})
+	this.move({
+		x : -dx,
+		y : 0
+	})
 }
 Thing.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
-	if(this.sprite) {
+	if (this.sprite) {
 		this.sprite.move(dx, dy)
 	} else {
 		this.rect().move(dx, dy);
@@ -82,7 +90,7 @@ Thing.prototype.name = function() {
 	return this._name || 'Thing';
 }
 Thing.prototype.rect = function() {
-	if(this.sprite) {
+	if (this.sprite) {
 		return this.sprite.rect()
 	} else {
 		return this.my_rect;
@@ -90,7 +98,7 @@ Thing.prototype.rect = function() {
 }
 Thing.prototype.takeDamageFrom = function(damage, thing) {
 	this.hp -= damage
-	console.log('Took '+damage+' damage!')
+	console.log('Took ' + damage + ' damage!')
 }
 Thing.isDead = function(item) {
 	return !item.isAlive()
@@ -100,7 +108,10 @@ function Projectile(options) {
 	Thing.call(this, options) // Use parent's constructor
 	this.startX = options.x
 	this.startY = options.y
-	this.speed_vector = {x:options.speed_vector.x, y:options.speed_vector.y}
+	this.speed_vector = {
+		x : options.speed_vector.x,
+		y : options.speed_vector.y
+	}
 	this.range = options.range
 	this.affectedByGravity = options.affectedByGravity
 	this.collision = false
@@ -113,7 +124,7 @@ Projectile.prototype.doCollideWith = function(thing) {
 }
 Projectile.prototype.damageTo = function(thing) {
 	var damage = 0
-	if(thing.isEnemy) {
+	if (thing.isEnemy) {
 		damage = this.damage
 	}
 	return damage
@@ -130,19 +141,20 @@ Projectile.prototype.isInRange = function() {
 	return this.rect().x < (this.startX + this.range)
 }
 Projectile.prototype.logFired = function() {
-	console.log(this.name() + ' fired! Init vector: x='+this.speed_vector.x + ', y='+this.speed_vector.y)
+	console.log(this.name() + ' fired! Init vector: x=' + this.speed_vector.x
+			+ ', y=' + this.speed_vector.y)
 }
 Projectile.prototype.move = function() {
-	if(this.affectedByGravity) {
+	if (this.affectedByGravity) {
 		this.speed_vector.y += game.gravity
 	}
-	if(this.sprite) {
+	if (this.sprite) {
 		this.sprite.move(this.speed_vector.x, this.speed_vector.y)
 	} else {
 		this.rect().move(this.speed_vector.x, this.speed_vector.y)
 	}
-//	this.rect().x += this.speed_vector.x
-//	this.rect().y += this.speed_vector.y
+	// this.rect().x += this.speed_vector.x
+	// this.rect().y += this.speed_vector.y
 }
 Projectile.prototype.update = function() {
 	this.move()
@@ -155,12 +167,16 @@ Projectile.isOutsideRange = function(item) {
 function Seal(options) {
 	this._name = 'Golden Seal'
 	options.height = 49
-	options.width = 49  // sprite 
+	options.width = 49 // sprite
 	options.y = game.ground.rect().y - options.height - 1
-	this.sprite = new jaws.Sprite({image: "seal1.png", x: options.x, y: options.y});
+	this.sprite = new jaws.Sprite({
+		image : "seal1.png",
+		x : options.x,
+		y : options.y
+	});
 	Projectile.call(this, options)
 	this.draw = function() {
-//		drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
+		// drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
 		this.sprite.draw()
 	}
 }
@@ -171,7 +187,7 @@ function Dash(options) {
 	options.height = 4
 	options.width = 14
 	options.x += 9
-	options.y += 8  //game.ground.rect().y - options.height - 1
+	options.y += 8 // game.ground.rect().y - options.height - 1
 	Projectile.call(this, options)
 	this.draw = function() {
 		drawText(20, 'Teal', '-', this.rect().x - 1, this.rect().bottom + 5)
@@ -199,15 +215,15 @@ function Weapon(options) {
 	this.speed = 1
 	this.initialVector = options.initialVector
 	this._name = options.name
-	
+
 	this.projectile = function(owner) {
 		var projectile = new this.projectileType({
 			x : owner.rect().right - (owner.rect().width / 2),
 			y : owner.rect().y,
-			speed_vector: this.initialVector,
-			affectedByGravity: this.affectedByGravity,
-			damage: this.damage,
-			range: this.range
+			speed_vector : this.initialVector,
+			affectedByGravity : this.affectedByGravity,
+			damage : this.damage,
+			range : this.range
 		})
 		return projectile
 	}
@@ -215,56 +231,66 @@ function Weapon(options) {
 
 var allWeapons = {
 	SealWeapon : new Weapon({
-		name: 'Golden Seal',
+		name : 'Golden Seal',
 		speed : 2,
 		range : 300,
-		damage: 1,
+		damage : 1,
 		cooldown : 300,
-		affectedByGravity: true,
-		initialVector: {x: 2, y: -4},
+		affectedByGravity : true,
+		initialVector : {
+			x : 2,
+			y : -4
+		},
 		projectileType : Seal
 	}),
 	DashWeapon : new Weapon({
-		name: 'Angelic Bow',
+		name : 'Angelic Bow',
 		speed : 3,
-		initialVector: {x: 3, y: -0.5},  // speed, elevation
+		initialVector : {
+			x : 3,
+			y : -0.5
+		}, // speed, elevation
 		range : 500,
-		damage: 1,
+		damage : 1,
 		cooldown : 300,
-		affectedByGravity: true,
+		affectedByGravity : true,
 		projectileType : Dash
 	}),
 	ExWeapon : new Weapon({
 		speed : 3,
 		range : 10000,
 		cooldown : 300,
-		affectedByGravity: false,
-		ricochets: true,
+		affectedByGravity : false,
+		ricochets : true,
 		projectileType : Ex
 	})
 }
 
 function Player(options) {
 	options.x += game.groundX
-	options.y = game.groundY - 25 
+	options.y = game.groundY - 25
 	options.width = 50
 	options.height = 51
 	options.hp = 5
 	Thing.call(this, options) // Use parent's constructor
 	this._name = 'Player'
 	this.isPlayer = true
-	
-	this.sprite = new jaws.Sprite({image: "angel2_50.png", x: options.x, y: options.y,
-		anchor: "center"});
-	
+
+	this.sprite = new jaws.Sprite({
+		image : "angel2_50.png",
+		x : options.x,
+		y : options.y,
+		anchor : "center"
+	});
+
 	this.speed = options.speed
 }
 Object.extend(Player, Thing)
 Player.prototype.draw = function() {
-//		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
-		this.sprite.draw()
-		var txt = 'Virtue: '+this.hp
-		drawText(8, 'White', txt, this.rect().x, this.rect().y - 2)
+	// drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
+	this.sprite.draw()
+	var txt = 'Virtue: ' + this.hp
+	drawText(8, 'White', txt, this.rect().x, this.rect().y - 2)
 }
 Player.prototype.isAlive = function() {
 	return this.hp > 0
@@ -286,39 +312,46 @@ function Enemy(options) {
 	Thing.call(this, options) // Use parent's constructor
 	this._name = 'Enemy Angel'
 	this.touchDamage = 1
-	
-	this.sprite = new jaws.Sprite({image: "angel3_50.png", x: options.x, y: options.y,
-		anchor: "center"});
-	
+	this.isEnemy = true
+	this.speed = 1
+
+	this.sprite = new jaws.Sprite({
+		image : "angel3_50.png",
+		x : options.x,
+		y : options.y,
+		anchor : "center"
+	});
+
 	this.collision = false
-	
-	this.draw = function() {
-//		drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
-		this.sprite.draw()
-		var txt = 'Pride: '+this.hp
-		drawText(8, 'Red', txt, this.rect().x + 3, this.rect().y - 2)
-	}
 }
 Object.extend(Enemy, Thing)
 
-Enemy.prototype.isEnemy = true
-
 Enemy.prototype.damageTo = function(thing) {
 	var damage = 0
-	if(thing.isPlayer) {
+	if (thing.isPlayer) {
 		damage = this.touchDamage
 	}
 	return damage
 }
 
+Enemy.prototype.draw = function() {
+	// drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
+	this.sprite.draw()
+	var txt = 'Pride: ' + this.hp
+	drawText(8, 'Red', txt, this.rect().x + 3, this.rect().y - 2)
+}
+
 Enemy.prototype.doCollideWith = function(thing) {
-	if(thing.damageTo) {
+	if (thing.damageTo) {
 		damage = thing.damageTo(this)
 	} else {
 		damage = 0
 	}
 	this.takeDamageFrom(damage, thing)
 	this.collision = true
+}
+Enemy.prototype.isAlive = function() {
+	return this.hp > 0
 }
 Enemy.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
@@ -328,43 +361,49 @@ Enemy.prototype.move = function(dxdy) {
 Enemy.prototype.rect = function() {
 	return this.sprite.rect()
 }
-Enemy.prototype.isAlive = function() {
-	return this.hp > 0
+Enemy.prototype.update = function() {
+	dxdy = direction_keys['left']
+	this.move(dxdy)
 }
 
 /**
- * GameState is the actual game play. We switch to it once user choses "Start game"
- *
+ * GameState is the actual game play. We switch to it once user choses "Start
+ * game"
+ * 
  */
 function GameState() {
 	var playerProjectiles = new jaws.SpriteList()
 	var enemies = new jaws.SpriteList()
-//	var test = new Star({
-//		x : 100,
-//		y : 100,
-//		speed_vector: {x: 2, y: 0},
-//		affectedByGravity: false,
-//		range: 30
-//	})
-	
-	var background = new jaws.Sprite({image: "background2.png", x: 0, y: 0})
-	
+	// var test = new Star({
+	// x : 100,
+	// y : 100,
+	// speed_vector: {x: 2, y: 0},
+	// affectedByGravity: false,
+	// range: 30
+	// })
+
+	var background = new jaws.Sprite({
+		image : "background2.png",
+		x : 0,
+		y : 0
+	})
+
 	this.setup = function() {
 		jaws.on_keydown("esc", function() {
 			jaws.switchGameState(MenuState)
 		})
-		jaws.preventDefaultKeys(["left", "right", "space"])
-		
+		jaws.preventDefaultKeys([ "left", "right", "space" ])
+
 		game.player = new Player({
 			x : 20,
-			speed: game.playerSpeed
+			speed : game.playerSpeed
 		})
 		game.player.can_fire = true
 		game.player.weapon = allWeapons.DashWeapon
-		
+
 		enemy = new Enemy({
-			x: 300,
-			hp: 3
+			x : 300,
+			hp : 3
 		})
 		enemies.push(enemy)
 	}
@@ -373,10 +412,10 @@ function GameState() {
 		// Clear screen
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
-//		jaws.context.globalAlpha = 0.25
+		// jaws.context.globalAlpha = 0.25
 		background.draw()
-//		jaws.context.globalAlpha = 1
-		
+		// jaws.context.globalAlpha = 1
+
 		this.drawGround()
 		game.player.draw()
 		enemies.draw()
@@ -387,22 +426,24 @@ function GameState() {
 		jaws.context.strokeStyle = "white"
 		jaws.context.fillStyle = "blue"
 		jaws.context.lineWidth = 1
-//		jaws.context.fillRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
-		jaws.context.strokeRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
+		// jaws.context.fillRect(game.ground.x, game.ground.y,
+		// game.ground.width, game.ground.height)
+		jaws.context.strokeRect(game.ground.x, game.ground.y,
+				game.ground.width, game.ground.height)
 	}
-	
+
 	this.levelMarkCleared = function() {
 		currentStage = game.stageList.currentStage()
 		currentStage.nextLevelMarkCleared()
-		if(currentStage.isCleared()) {
+		if (currentStage.isCleared()) {
 			jaws.switchGameState(StageClearedState)
 		} else {
-			// Stage not yet cleared, has more levels. 
+			// Stage not yet cleared, has more levels.
 			jaws.switchGameState(GameState)
 		}
-		
+
 	}
-	
+
 	this.update = function() {
 		var player = game.player
 		var dxdy
@@ -415,35 +456,40 @@ function GameState() {
 			player.move(dxdy)
 		}
 		if (jaws.pressed("space")) {
-			if(player.can_fire) {
+			if (player.can_fire) {
 				bullet = player.weapon.projectile(player)
 				bullet.logFired()
 				playerProjectiles.push(bullet)
 				player.can_fire = false
-				setTimeout(function() { game.player.can_fire = true }, game.player.weapon.cooldown)
+				setTimeout(function() {
+					game.player.can_fire = true
+				}, game.player.weapon.cooldown)
 			}
 		}
 		playerProjectiles.update()
 		playerProjectiles.removeIf(Projectile.isOutsideRange)
-		
-		jaws.collideOneWithMany(player, enemies).forEach( function(enemy) {
-			console.log(player.name()+' collided with '+enemy.name())
+		jaws.collideManyWithMany(playerProjectiles, enemies).forEach(
+				function(pair, index) {
+					bullet = pair[0]
+					enemy = pair[1]
+					bullet.doCollideWith(enemy)
+					enemy.doCollideWith(bullet)
+				});
+		playerProjectiles.removeIf(Thing.isDead)
+
+		enemies.update()
+
+		jaws.collideOneWithMany(player, enemies).forEach(function(enemy) {
+			console.log(player.name() + ' collided with ' + enemy.name())
 			var touchDamage = enemy.damageTo(player)
 			player.takeDamageFrom(touchDamage, enemy)
 			player.knockBack(10)
 		})
-		jaws.collideManyWithMany(playerProjectiles, enemies).forEach( function(pair, index) {
-			bullet = pair[0]
-			enemy = pair[1]
-			bullet.doCollideWith(enemy)
-			enemy.doCollideWith(bullet)
-		});
-		playerProjectiles.removeIf(Thing.isDead)
 		enemies.removeIf(Thing.isDead)
 		if (!player.isAlive()) {
 			jaws.switchGameState(GameOverState)
 		}
-		if(enemies.length == 0) {
+		if (enemies.length == 0) {
 			this.levelMarkCleared()
 		}
 	}
@@ -451,7 +497,7 @@ function GameState() {
 
 /**
  * Start menu
- *
+ * 
  */
 function MenuState() {
 	this.setup = function() {
@@ -470,7 +516,7 @@ function MenuState() {
 				index = 0
 			}
 		})
-		jaws.on_keydown([ "enter"], function() {
+		jaws.on_keydown([ "enter" ], function() {
 			jaws.switchGameState(StageReadyState)
 		})
 	}
@@ -488,31 +534,34 @@ function MenuState() {
 function StageReadyState() {
 	var index = 0
 	var items = []
-	
+
 	this.setup = function() {
 		stageList = game.stageList
-		if(stageList.allStagesClear()) {
+		if (stageList.allStagesClear()) {
 			jaws.switchGameState(WinState)
 		}
-		jaws.preventDefaultKeys(["enter", "esc"])
-		jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
-		
+		jaws.preventDefaultKeys([ "enter", "esc" ])
+		jaws.on_keydown("esc", function() {
+			jaws.switchGameState(MenuState)
+		})
+
 		var result = stageList.nextStage()
-		if(result) {
-			console.log('In StageReadyState. Next stage selected: Chapter '+game.stageList.currentStageId())
-			jaws.on_keydown(["enter"],  function()  {
-				jaws.switchGameState(GameState) 
+		if (result) {
+			console.log('In StageReadyState. Next stage selected: Chapter '
+					+ game.stageList.currentStageId())
+			jaws.on_keydown([ "enter" ], function() {
+				jaws.switchGameState(GameState)
 			})
 		} else {
 			console.log('In StageReadyStage. No more stages')
 			// No more stages
 		}
 	}
-	
+
 	this.draw = function() {
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
-		var txt = 'Chapter '+ game.stageList.currentStageId()
+		var txt = 'Chapter ' + game.stageList.currentStageId()
 		drawText(25, "White", txt, 150, 75)
 		drawText(15, "White", "Prepare for Battle!", 150, 150)
 		drawText(10, "White", "[Enter]", 150, 200)
@@ -521,16 +570,18 @@ function StageReadyState() {
 
 function StageClearedState() {
 	this.setup = function() {
-		if(game.stageList.allStagesClear()) {
+		if (game.stageList.allStagesClear()) {
 			jaws.switchGameState(WinState)
 		}
-		jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
-		jaws.preventDefaultKeys(["enter"])
-		jaws.on_keydown(["enter"],  function()  { 
-			jaws.switchGameState(StageReadyState) 
+		jaws.on_keydown("esc", function() {
+			jaws.switchGameState(MenuState)
+		})
+		jaws.preventDefaultKeys([ "enter" ])
+		jaws.on_keydown([ "enter" ], function() {
+			jaws.switchGameState(StageReadyState)
 		})
 	}
-	
+
 	this.draw = function() {
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
@@ -541,29 +592,31 @@ function StageClearedState() {
 
 function GameOverState() {
 	this.setup = function() {
-		jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
-		jaws.preventDefaultKeys(["enter"])
-		jaws.on_keydown(["enter"],  function()  { 
-			jaws.switchGameState(MenuState) 
+		jaws.on_keydown("esc", function() {
+			jaws.switchGameState(MenuState)
+		})
+		jaws.preventDefaultKeys([ "enter" ])
+		jaws.on_keydown([ "enter" ], function() {
+			jaws.switchGameState(MenuState)
 		})
 	}
-	
+
 	this.draw = function() {
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
-		
+
 		drawText(40, "Red", "Game Over!", 250, 150)
 		drawText(20, "Red", "(press Enter to restart)", 225, 300)
 	}
 }
 function WinState() {
 	this.setup = function() {
-		jaws.preventDefaultKeys(["esc"])
-		jaws.on_keydown(["esc"],  function()  { 
-			jaws.switchGameState(MenuState) 
+		jaws.preventDefaultKeys([ "esc" ])
+		jaws.on_keydown([ "esc" ], function() {
+			jaws.switchGameState(MenuState)
 		})
 	}
-	
+
 	this.draw = function() {
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
