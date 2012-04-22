@@ -265,6 +265,9 @@ Player.prototype.draw = function() {
 		var txt = 'Virtue: '+this.hp
 		drawText(8, 'White', txt, this.rect().x, this.rect().y - 2)
 }
+Player.prototype.isAlive = function() {
+	return this.hp > 0
+}
 Player.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
@@ -326,7 +329,6 @@ Enemy.prototype.rect = function() {
 }
 Enemy.prototype.isAlive = function() {
 	return this.hp > 0
-//	return !this.collision
 }
 
 /**
@@ -425,6 +427,9 @@ function GameState() {
 		});
 		playerProjectiles.removeIf(Thing.isDead)
 		enemies.removeIf(Thing.isDead)
+		if (!player.isAlive()) {
+			jaws.switchGameState(GameOverState)
+		}
 	}
 }
 
@@ -462,6 +467,23 @@ function MenuState() {
 	}
 }
 
+function GameOverState() {
+	this.setup = function() {
+		jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
+		jaws.preventDefaultKeys(["enter"])
+		jaws.on_keydown(["enter"],  function()  { 
+			jaws.switchGameState(MenuState) 
+		})
+	}
+	
+	this.draw = function() {
+		jaws.context.fillStyle = game.backgroundColor
+		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
+		
+		drawText(40, "Red", "Game Over!", 250, 150)
+		drawText(20, "Red", "(press Enter to restart)", 225, 300)
+	}
+}
 function initAssets() {
 	jaws.assets.add("background2.png")
 	jaws.assets.add("seal1.png")
