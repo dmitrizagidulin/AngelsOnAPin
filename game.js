@@ -405,6 +405,7 @@ function GameState() {
  */
 function MenuState() {
 	this.setup = function() {
+		stopSound('win')
 		playSoundTag('start')
 		
 		game.stageList.resetStages()
@@ -478,14 +479,18 @@ function StageReadyState() {
 
 function StageClearedState() {
 	this.setup = function() {
+		playSoundTag('stage_clear')
 		if (game.stageList.allStagesClear()) {
+			stopSound('stage_clear')
 			jaws.switchGameState(WinState)
 		}
 		jaws.on_keydown("esc", function() {
+			stopSound('stage_clear')
 			jaws.switchGameState(MenuState)
 		})
 		jaws.preventDefaultKeys([ "enter" ])
 		jaws.on_keydown([ "enter" ], function() {
+			stopSound('stage_clear')
 			jaws.switchGameState(StageReadyState)
 		})
 	}
@@ -522,6 +527,7 @@ function GameOverState() {
 }
 function WinState() {
 	this.setup = function() {
+		stopSound('stage_clear')
 		playSoundTag('win')
 		jaws.preventDefaultKeys([ "esc" ])
 		jaws.on_keydown([ "esc" ], function() {
