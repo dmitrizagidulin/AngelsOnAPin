@@ -65,6 +65,9 @@ Thing.prototype.drawRect = function() {
 				this.rect().height)
 	}
 }
+Thing.prototype.knockBack = function(dx) {
+	this.move({x: -dx, y:0})
+}
 Thing.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
@@ -248,6 +251,7 @@ function Player(options) {
 	options.hp = 5
 	Thing.call(this, options) // Use parent's constructor
 	this._name = 'Player'
+	this.isPlayer = true
 	
 	this.sprite = new jaws.Sprite({image: "angel2_50.png", x: options.x, y: options.y,
 		anchor: "center"});
@@ -277,6 +281,7 @@ function Enemy(options) {
 	options.height = 48
 	Thing.call(this, options) // Use parent's constructor
 	this._name = 'Enemy Angel'
+	this.touchDamage = 1
 	
 	this.sprite = new jaws.Sprite({image: "angel3_50.png", x: options.x, y: options.y,
 		anchor: "center"});
@@ -294,14 +299,14 @@ Object.extend(Enemy, Thing)
 
 Enemy.prototype.isEnemy = true
 
-Enemy.prototype.move = function(dxdy) {
-	dx = dxdy.x * this.speed
-	dy = dxdy.y * this.speed
-	this.sprite.move(dx, dy);
+Enemy.prototype.damageTo = function(thing) {
+	var damage = 0
+	if(thing.isPlayer) {
+		damage = this.touchDamage
+	}
+	return damage
 }
-Enemy.prototype.rect = function() {
-	return this.sprite.rect()
-}
+
 Enemy.prototype.doCollideWith = function(thing) {
 	if(thing.damageTo) {
 		damage = thing.damageTo(this)
@@ -311,7 +316,14 @@ Enemy.prototype.doCollideWith = function(thing) {
 	this.takeDamageFrom(damage, thing)
 	this.collision = true
 }
-
+Enemy.prototype.move = function(dxdy) {
+	dx = dxdy.x * this.speed
+	dy = dxdy.y * this.speed
+	this.sprite.move(dx, dy);
+}
+Enemy.prototype.rect = function() {
+	return this.sprite.rect()
+}
 Enemy.prototype.isAlive = function() {
 	return this.hp > 0
 //	return !this.collision
@@ -399,9 +411,12 @@ function GameState() {
 		playerProjectiles.update()
 		playerProjectiles.removeIf(Projectile.isOutsideRange)
 		
-//		jaws.collideOneWithMany(game.ground, playerProjectiles).forEach( function(bullet) {
-////				bullet.doCollideWith(game.ground)
-//		})
+		jaws.collideOneWithMany(player, enemies).forEach( function(enemy) {
+			console.log(player.name()+' collided with '+enemy.name())
+			var touchDamage = enemy.damageTo(player)
+			player.takeDamageFrom(touchDamage, enemy)
+			player.knockBack(10)
+		})
 		jaws.collideManyWithMany(playerProjectiles, enemies).forEach( function(pair, index) {
 			bullet = pair[0]
 			enemy = pair[1]
