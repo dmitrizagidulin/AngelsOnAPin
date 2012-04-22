@@ -43,6 +43,7 @@ function Thing(options) {
 	this.y = options.y
 	this.height = options.height
 	this.width = options.width
+	this.hp = options.hp || 0
 	
 	if(!this.height) {
 		this.height = game.creatureHeight
@@ -63,7 +64,6 @@ Thing.prototype.drawRect = function() {
 				this.rect().height)
 	}
 }
-
 Thing.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
@@ -80,6 +80,10 @@ Thing.prototype.rect = function() {
 		return this.my_rect;
 	}
 }
+Thing.prototype.takeDamageFrom = function(damage, thing) {
+	this.hp -= damage
+	console.log('Took '+damage+' damage!')
+}
 Thing.isDead = function(item) {
 	return !item.isAlive()
 }
@@ -92,13 +96,20 @@ function Projectile(options) {
 	this.range = options.range
 	this.affectedByGravity = options.affectedByGravity
 	this.collision = false
+	this.damage = options.damage
 }
 Object.extend(Projectile, Thing)
 
 Projectile.prototype.doCollideWith = function(thing) {
 	this.collision = true
 }
-
+Projectile.prototype.damageTo = function(thing) {
+	var damage = 0
+	if(thing.isEnemy) {
+		damage = this.damage
+	}
+	return damage
+}
 Projectile.prototype.hasHitGround = function() {
 	hasHitGround = jaws.collideOneWithOne(this, game.ground)
 	return hasHitGround
@@ -163,14 +174,13 @@ function Ex(options) {
 }
 Object.extend(Ex, Projectile)
 
-
 function Weapon(options) {
 	this.speed = options.speed
 	this.range = options.range
 	this.cooldown = options.cooldown
 	this.projectileType = options.projectileType
 	this.affectedByGravity = options.affectedByGravity
-	
+	this.damage = options.damage
 	this.speed = 1
 	
 	this.projectile = function(owner) {
@@ -178,7 +188,8 @@ function Weapon(options) {
 			x : owner.rect().right - (owner.rect().width / 2),
 //			y : owner.y,
 			speed_vector: {x: this.speed, y: -4},
-			affectedByGravity: true, //this.affectedByGravity,
+			affectedByGravity: this.affectedByGravity,
+			damage: this.damage,
 			range: 600 //this.range
 		})
 		return projectile
@@ -189,8 +200,9 @@ var allWeapons = {
 	SealWeapon : new Weapon({
 		speed : 2,
 		range : 50,
+		damage: 1,
 		cooldown : 300,
-		affectedByGravity: false,
+		affectedByGravity: true,
 		projectileType : Seal
 	}),
 	DashWeapon : new Weapon({
@@ -221,13 +233,14 @@ function Player(options) {
 		anchor: "center"});
 	
 	this.speed = options.speed
-	
-	this.draw = function() {
-//		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
-		this.sprite.draw()
-	}
 }
 Object.extend(Player, Thing)
+Player.prototype.draw = function() {
+//		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
+		this.sprite.draw()
+		var txt = 'Hp: '+this.hp
+		drawText(8, 'White', txt, this.rect().x + 10, this.rect().y - 2)
+}
 Player.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
@@ -252,9 +265,17 @@ function Enemy(options) {
 	this.draw = function() {
 //		drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
 		this.sprite.draw()
+		var txt = 'Hp: '+this.hp
+		drawText(8, 'Red', txt, this.rect().x + 10, this.rect().y - 2)
 	}
 }
 Object.extend(Enemy, Thing)
+
+Enemy.prototype.name = function() {
+	return 'Enemy Angel';
+}
+Enemy.prototype.isEnemy = true
+
 Enemy.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
@@ -264,11 +285,18 @@ Enemy.prototype.rect = function() {
 	return this.sprite.rect()
 }
 Enemy.prototype.doCollideWith = function(thing) {
+	if(thing.damageTo) {
+		damage = thing.damageTo(this)
+	} else {
+		damage = 0
+	}
+	this.takeDamageFrom(damage, thing)
 	this.collision = true
 }
 
 Enemy.prototype.isAlive = function() {
-	return !this.collision
+	return this.hp > 0
+//	return !this.collision
 }
 
 /**
@@ -302,7 +330,8 @@ function GameState() {
 		game.player.weapon = allWeapons.SealWeapon
 		
 		enemy = new Enemy({
-			x: 300
+			x: 300,
+			hp: 3
 		})
 		enemies.push(enemy)
 	}
