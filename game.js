@@ -351,6 +351,7 @@ function GameState() {
 				bullet = player.weapon.projectile(player)
 				bullet.logFired()
 				playerProjectiles.push(bullet)
+				playSoundTag('fire2')
 				player.can_fire = false
 				setTimeout(function() {
 					game.player.can_fire = true
@@ -405,6 +406,8 @@ function GameState() {
  */
 function MenuState() {
 	this.setup = function() {
+		playSoundTag('start')
+		
 		game.stageList.resetStages()
 		console.log('In MenuState, all stages reset')
 		index = 0
@@ -440,6 +443,8 @@ function StageReadyState() {
 	var items = []
 
 	this.setup = function() {
+		playSoundTag('horn')
+		
 		stageList = game.stageList
 		if (stageList.allStagesClear()) {
 			jaws.switchGameState(WinState)
@@ -496,6 +501,7 @@ function StageClearedState() {
 
 function GameOverState() {
 	this.setup = function() {
+		playSoundTag('fail')
 		jaws.on_keydown("esc", function() {
 			jaws.switchGameState(MenuState)
 		})
@@ -515,6 +521,7 @@ function GameOverState() {
 }
 function WinState() {
 	this.setup = function() {
+		playSoundTag('win')
 		jaws.preventDefaultKeys([ "esc" ])
 		jaws.on_keydown([ "esc" ], function() {
 			jaws.switchGameState(MenuState)
