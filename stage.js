@@ -10,7 +10,7 @@ function Enemy(options) {
 	this.speed = 1
 
 	this.sprite = new jaws.Sprite({
-		image : "angel3_50.png",
+		image : options.sprite,
 		x : options.x,
 		y : options.y,
 		anchor : "center"
@@ -60,9 +60,9 @@ Enemy.prototype.update = function() {
 	this.move(dxdy)
 }
 Enemy.bestiary = {
-	'red_angel' : {
-		'sprite' : 'angel3_50.png',
-		x : 650,
+	red_angel: {
+		sprite: 'angel3_50.png',
+		x: 550,
 		hp: 3
 	}
 }
