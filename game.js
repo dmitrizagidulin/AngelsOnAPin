@@ -165,7 +165,8 @@ function Dash(options) {
 	this._name = 'Angelic Arrow'
 	options.height = 4
 	options.width = 14
-	options.y = game.ground.rect().y - options.height - 1
+	options.x += 9
+	options.y += 8  //game.ground.rect().y - options.height - 1
 	Projectile.call(this, options)
 	this.draw = function() {
 		drawText(20, 'Teal', '-', this.rect().x - 1, this.rect().bottom + 5)
@@ -197,7 +198,7 @@ function Weapon(options) {
 	this.projectile = function(owner) {
 		var projectile = new this.projectileType({
 			x : owner.rect().right - (owner.rect().width / 2),
-//			y : owner.y,
+			y : owner.rect().y,
 			speed_vector: this.initialVector,
 			affectedByGravity: this.affectedByGravity,
 			damage: this.damage,
@@ -221,11 +222,11 @@ var allWeapons = {
 	DashWeapon : new Weapon({
 		name: 'Angelic Bow',
 		speed : 3,
+		initialVector: {x: 3, y: -0.5},  // speed, elevation
 		range : 500,
 		damage: 1,
 		cooldown : 300,
 		affectedByGravity: true,
-		initialVector: {x: 2, y: -4},
 		projectileType : Dash
 	}),
 	ExWeapon : new Weapon({
@@ -243,6 +244,7 @@ function Player(options) {
 	options.y = game.groundY - 25 
 	options.width = 50
 	options.height = 51
+	options.hp = 5
 	Thing.call(this, options) // Use parent's constructor
 	this._name = 'Player'
 	
@@ -255,8 +257,8 @@ Object.extend(Player, Thing)
 Player.prototype.draw = function() {
 //		drawText(20, 'White', 'A', this.rect().x, this.rect().bottom)
 		this.sprite.draw()
-		var txt = 'Hp: '+this.hp
-		drawText(8, 'White', txt, this.rect().x + 10, this.rect().y - 2)
+		var txt = 'Virtue: '+this.hp
+		drawText(8, 'White', txt, this.rect().x, this.rect().y - 2)
 }
 Player.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
@@ -283,8 +285,8 @@ function Enemy(options) {
 	this.draw = function() {
 //		drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
 		this.sprite.draw()
-		var txt = 'Hp: '+this.hp
-		drawText(8, 'Red', txt, this.rect().x + 10, this.rect().y - 2)
+		var txt = 'Pride: '+this.hp
+		drawText(8, 'Red', txt, this.rect().x + 3, this.rect().y - 2)
 	}
 }
 Object.extend(Enemy, Thing)
@@ -342,7 +344,7 @@ function GameState() {
 			speed: game.playerSpeed
 		})
 		game.player.can_fire = true
-		game.player.weapon = allWeapons.SealWeapon
+		game.player.weapon = allWeapons.DashWeapon
 		
 		enemy = new Enemy({
 			x: 300,
