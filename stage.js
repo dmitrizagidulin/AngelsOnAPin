@@ -8,7 +8,8 @@ function Enemy(options) {
 	this.touchDamage = 1
 	this.isEnemy = true
 	this.speed = 1
-
+	this.startled = false
+	
 	this.sprite = new jaws.Sprite({
 		image : options.sprite,
 		x : options.x,
@@ -48,6 +49,9 @@ Enemy.prototype.isAlive = function() {
 	return this.hp > 0
 }
 Enemy.prototype.move = function(dxdy) {
+	if(!this.startled) {
+		return
+	}
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
 	this.sprite.move(dx, dy);
@@ -65,6 +69,15 @@ Enemy.bestiary = {
 		x: 550,
 		hp: 3
 	}
+}
+Enemy.templateFor = function(enemyId) {
+	var template = Enemy.bestiary[enemyId]
+	var data = {
+		sprite: template.sprite,
+		x: template.x,
+		hp: template.hp
+	}
+	return data
 }
 
 function Stage(id, data, stageList) {
@@ -97,7 +110,7 @@ function Stage(id, data, stageList) {
 		enemyList = this.enemyList()
 		for(i in enemyList) {
 			enemyId = enemyList[i]
-			enemyData = Enemy.bestiary[enemyId]
+			enemyData = Enemy.templateFor(enemyId)
 			enemyData.x += i * 100
 			console.log('i: '+i)
 			enemy = new Enemy(enemyData)
