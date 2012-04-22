@@ -45,65 +45,6 @@ function isOutsideCanvas(item) {
 			|| item.x > game.gameAreaMaxX || item.y > game.gameAreaMaxY)
 }
 
-function Thing(options) {
-	this.x = options.x
-	this.y = options.y
-	this.height = options.height
-	this.width = options.width
-	this.hp = options.hp || 0
-
-	if (!this.height) {
-		this.height = game.creatureHeight
-	}
-	if (!this.width) {
-		this.width = this.height
-	}
-	this.my_rect = new jaws.Rect(this.x, this.y, this.width, this.height);
-	this.speed = 0
-}
-Thing.prototype.drawRect = function() {
-	if (this.sprite) {
-		this.sprite.rect().draw()
-	} else {
-		jaws.context.strokeStyle = "white"
-		jaws.context.lineWidth = 1
-		jaws.context.strokeRect(this.rect().x, this.rect().y,
-				this.rect().width, this.rect().height)
-	}
-}
-Thing.prototype.knockBack = function(dx) {
-	this.move({
-		x : -dx,
-		y : 0
-	})
-}
-Thing.prototype.move = function(dxdy) {
-	dx = dxdy.x * this.speed
-	dy = dxdy.y * this.speed
-	if (this.sprite) {
-		this.sprite.move(dx, dy)
-	} else {
-		this.rect().move(dx, dy);
-	}
-}
-Thing.prototype.name = function() {
-	return this._name || 'Thing';
-}
-Thing.prototype.rect = function() {
-	if (this.sprite) {
-		return this.sprite.rect()
-	} else {
-		return this.my_rect;
-	}
-}
-Thing.prototype.takeDamageFrom = function(damage, thing) {
-	this.hp -= damage
-	console.log('Took ' + damage + ' damage!')
-}
-Thing.isDead = function(item) {
-	return !item.isAlive()
-}
-
 function Projectile(options) {
 	Thing.call(this, options) // Use parent's constructor
 	this.startX = options.x
@@ -373,7 +314,7 @@ Enemy.prototype.update = function() {
  */
 function GameState() {
 	var playerProjectiles = new jaws.SpriteList()
-	var enemies = new jaws.SpriteList()
+	var enemies
 	// var test = new Star({
 	// x : 100,
 	// y : 100,
@@ -394,6 +335,8 @@ function GameState() {
 		})
 		jaws.preventDefaultKeys([ "left", "right", "space" ])
 
+		currentStage = game.stageList.currentStage()
+		
 		game.player = new Player({
 			x : 20,
 			speed : game.playerSpeed
@@ -401,11 +344,7 @@ function GameState() {
 		game.player.can_fire = true
 		game.player.weapon = allWeapons.DashWeapon
 
-		enemy = new Enemy({
-			x : 300,
-			hp : 3
-		})
-		enemies.push(enemy)
+		enemies = currentStage.enemies()
 	}
 
 	this.draw = function() {

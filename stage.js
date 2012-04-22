@@ -26,7 +26,11 @@ function Stage(id, data, stageList) {
 		enemyList = this.enemyList()
 		for(i in enemyList) {
 			enemyId = enemyList[i]
-			enemy = new Enemy(enemyId)
+//			enemy = new Enemy(enemyId)
+			enemy = new Enemy({
+				x : 300,
+				hp : 3
+			})
 //			sprite = enemy.getSprite()	
 			enemies.push(enemy)
 		}
