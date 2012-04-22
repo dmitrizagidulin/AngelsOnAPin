@@ -272,7 +272,7 @@ function GameState() {
 	var playerMoved = false
 	
 	var background = new jaws.Sprite({
-		image : "background2.png",
+		image : "background1.png",
 		x : 0,
 		y : 0
 	})
@@ -546,7 +546,7 @@ function WinState() {
 }
 
 function initAssets() {
-	jaws.assets.add("background2.png")
+	jaws.assets.add("background1.png")
 	jaws.assets.add("seal1.png")
 	jaws.assets.add("angel2_50.png")
 	jaws.assets.add("angel3_50.png")
