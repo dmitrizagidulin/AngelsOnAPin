@@ -1,9 +1,10 @@
+
 var game = {
 	creatureHeight: 17,
 	playerSpeed: 2,
 	groundX: 200,
-	groundY: 330,
-	groundWidth: 450,
+	groundY: 310,
+	groundWidth: 490,
 	groundHeight: 10,
 	gameAreaMinX: 10,
 	gameAreaMaxX: 890,
@@ -53,18 +54,31 @@ function Thing(options) {
 	this.speed = 0
 }
 Thing.prototype.drawRect = function() {
-	jaws.context.strokeStyle = "white"
-	jaws.context.lineWidth = 1
-	jaws.context.strokeRect(this.rect().x, this.rect().y, this.rect().width,
-			this.rect().height)
+	if(this.sprite) {
+		this.sprite.rect().draw()
+	} else {
+		jaws.context.strokeStyle = "white"
+		jaws.context.lineWidth = 1
+		jaws.context.strokeRect(this.rect().x, this.rect().y, this.rect().width,
+				this.rect().height)
+	}
 }
 
 Thing.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed
 	dy = dxdy.y * this.speed
-	this.rect().move(dx, dy);
+	if(this.sprite) {
+		this.sprite.move(dx, dy)
+	} else {
+		this.rect().move(dx, dy);
+	}
 }
 Thing.prototype.rect = function() {
+//	if(this.sprite) {
+//		return this.sprite.rect()
+//	} else {
+//		return this.my_rect;
+//	}
 	return this.my_rect;
 }
 Thing.isDead = function(item) {
@@ -101,7 +115,11 @@ Projectile.prototype.move = function() {
 	if(this.affectedByGravity) {
 		this.speed_vector.y += game.gravity
 	}
-	this.rect().move(this.speed_vector.x, this.speed_vector.y)
+	if(this.sprite) {
+		this.sprite.move(this.speed_vector.x, this.speed_vector.y)
+	} else {
+		this.rect().move(this.speed_vector.x, this.speed_vector.y)
+	}
 //	this.rect().x += this.speed_vector.x
 //	this.rect().y += this.speed_vector.y
 }
@@ -113,15 +131,22 @@ Projectile.isOutsideRange = function(item) {
 	isOutsideRange = !item.isInRange() || item.hasHitGround()
 	return isOutsideRange
 }
-function Star(options) {
+function Seal(options) {
 	options.height = 13
 	options.width = 13
+	this.sprite = new jaws.Sprite({image: "seal1.png", x: options.x, y: options.y});
 	Projectile.call(this, options)
 	this.draw = function() {
-		drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
+//		drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
+		this.sprite.draw()
+		this.drawRect()
 	}
 }
-Object.extend(Star, Projectile)
+Object.extend(Seal, Projectile)
+
+Seal.prototype.isAlive = function() {
+	return true
+}
 
 function Dash(options) {
 	options.height = 4
@@ -132,6 +157,16 @@ function Dash(options) {
 	}
 }
 Object.extend(Dash, Projectile)
+
+function Ex(options) {
+	options.height = 4
+	options.width = 14
+	Projectile.call(this, options)
+	this.draw = function() {
+		drawText(20, 'Pink', 'x', this.rect().x - 1, this.rect().bottom + 5)
+	}
+}
+Object.extend(Ex, Projectile)
 
 
 function Weapon(options) {
@@ -156,12 +191,12 @@ function Weapon(options) {
 }
 
 var allWeapons = {
-	StarWeapon : new Weapon({
+	SealWeapon : new Weapon({
 		speed : 2,
 		range : 50,
 		cooldown : 300,
 		affectedByGravity: false,
-		projectileType : Star
+		projectileType : Seal
 	}),
 	DashWeapon : new Weapon({
 		speed : 3,
@@ -169,6 +204,14 @@ var allWeapons = {
 		cooldown : 300,
 		affectedByGravity: true,
 		projectileType : Dash
+	}),
+	ExWeapon : new Weapon({
+		speed : 3,
+		range : 10000,
+		cooldown : 300,
+		affectedByGravity: false,
+		ricochets: true,
+		projectileType : Ex
 	})
 }
 
@@ -248,6 +291,8 @@ function GameState() {
 //		range: 30
 //	})
 	
+	var background = new jaws.Sprite({image: "background2.png", x: 0, y: 0})
+	
 	this.setup = function() {
 		jaws.on_keydown("esc", function() {
 			jaws.switchGameState(MenuState)
@@ -259,7 +304,7 @@ function GameState() {
 			speed: game.playerSpeed
 		})
 		game.player.can_fire = true
-		game.player.weapon = allWeapons.StarWeapon
+		game.player.weapon = allWeapons.SealWeapon
 		
 		enemy = new Enemy({
 			x: 300
@@ -271,7 +316,10 @@ function GameState() {
 		// Clear screen
 		jaws.context.fillStyle = "#011451"
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
-
+//		jaws.context.globalAlpha = 0.25
+		background.draw()
+//		jaws.context.globalAlpha = 1
+		
 		this.drawGround()
 		game.player.draw()
 		enemies.draw()
@@ -282,7 +330,7 @@ function GameState() {
 		jaws.context.strokeStyle = "white"
 		jaws.context.fillStyle = "blue"
 		jaws.context.lineWidth = 1
-		jaws.context.fillRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
+//		jaws.context.fillRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
 		jaws.context.strokeRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
 	}
 	
@@ -350,12 +398,14 @@ function MenuState() {
 		jaws.context.clearRect(0, 0, jaws.width, jaws.height)
 
 		// Draw Title
-		drawText(60, "Black", "New Game", 200, 150)
+		drawText(45, "Black", "Angels on a Pin", 150, 150)
 
 	}
 }
 
 function initAssets() {
+	jaws.assets.add("background2.png")
+	jaws.assets.add("seal1.png")
 	jaws.assets.add("angel2_50.png")
 	jaws.assets.add("angel3_50.png")
 }
