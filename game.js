@@ -21,6 +21,8 @@ game.ground = new Thing({
 	height : game.groundHeight
 })
 
+var onscreenEnemies = []
+
 var direction_keys = {
 	left : {
 		x : -1,
@@ -113,15 +115,22 @@ function Seal(options) {
 	this.sprite = new jaws.Sprite({
 		image : "seal1.png",
 		x : options.x,
-		y : options.y
+		y : options.y,
+		anchor: 'center'
 	});
 	Projectile.call(this, options)
+	this.sprite.angle = 0
+
 	this.draw = function() {
 		// drawText(20, 'White', '*', this.rect().x - 2, this.rect().bottom + 5)
 		this.sprite.draw()
 	}
 }
 Object.extend(Seal, Projectile)
+Seal.prototype.update = function() {
+	this.sprite.angle += 2
+	this.move()
+}
 
 function Dash(options) {
 	this._name = 'Angelic Arrow'
@@ -180,7 +189,7 @@ var allWeapons = {
 		affectedByGravity : true,
 		initialVector : {
 			x : 2,
-			y : -4
+			y : -3
 		},
 		projectileType : Seal
 	}),
@@ -260,12 +269,14 @@ function GameState() {
 	// affectedByGravity: false,
 	// range: 30
 	// })
-
+	var playerMoved = false
+	
 	var background = new jaws.Sprite({
 		image : "background2.png",
 		x : 0,
 		y : 0
 	})
+	var alarmRaised = false
 
 	this.setup = function() {
 		jaws.on_keydown("esc", function() {
@@ -280,9 +291,10 @@ function GameState() {
 			speed : game.playerSpeed
 		})
 		game.player.can_fire = true
-		game.player.weapon = allWeapons.DashWeapon
+		game.player.weapon = allWeapons.SealWeapon
 
 		enemies = currentStage.enemies()
+		onscreenEnemies = enemies
 	}
 
 	this.draw = function() {
@@ -318,21 +330,23 @@ function GameState() {
 			// Stage not yet cleared, has more levels.
 			jaws.switchGameState(GameState)
 		}
-
 	}
 
 	this.update = function() {
 		var player = game.player
 		var dxdy
 		if (jaws.pressed("left")) {
+			playerMoved = true
 			dxdy = direction_keys['left']
 			player.move(dxdy)
 		}
 		if (jaws.pressed("right")) {
+			playerMoved = true
 			dxdy = direction_keys['right']
 			player.move(dxdy)
 		}
 		if (jaws.pressed("space")) {
+			playerMoved = true
 			if (player.can_fire) {
 				bullet = player.weapon.projectile(player)
 				bullet.logFired()
@@ -342,6 +356,19 @@ function GameState() {
 					game.player.can_fire = true
 				}, game.player.weapon.cooldown)
 			}
+		}
+		if(playerMoved && !alarmRaised) {
+			alarmRaised = true
+			console.log('Alarum!')
+			enemies.forEach(function(ea) { 
+				ea.showAlarm = true 
+			})
+			
+			setTimeout(function() {
+				onscreenEnemies.forEach(function(ea) {
+					ea.setInMotion()
+				})
+			}, 420)
 		}
 		playerProjectiles.update()
 		playerProjectiles.removeIf(Projectile.isOutsideRange)

@@ -9,6 +9,7 @@ function Enemy(options) {
 	this.isEnemy = true
 	this.speed = 1
 	this.startled = false
+	this.showAlarm = false
 	
 	this.sprite = new jaws.Sprite({
 		image : options.sprite,
@@ -34,6 +35,10 @@ Enemy.prototype.draw = function() {
 	this.sprite.draw()
 	var txt = 'Pride: ' + this.hp
 	drawText(8, 'Red', txt, this.rect().x + 3, this.rect().y - 2)
+	
+	if(this.showAlarm) {
+		drawText(20, 'Red', '!', this.rect().x + 18, this.rect().y - 15)
+	}
 }
 
 Enemy.prototype.doCollideWith = function(thing) {
@@ -58,6 +63,10 @@ Enemy.prototype.move = function(dxdy) {
 }
 Enemy.prototype.rect = function() {
 	return this.sprite.rect()
+}
+Enemy.prototype.setInMotion = function() {
+	this.startled = true
+	this.showAlarm = false
 }
 Enemy.prototype.update = function() {
 	dxdy = direction_keys['left']
