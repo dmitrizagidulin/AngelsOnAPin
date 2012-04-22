@@ -75,7 +75,7 @@ Enemy.prototype.update = function() {
 Enemy.bestiary = {
 	red_angel: {
 		sprite: 'angel3_50.png',
-		x: 550,
+		x: 750,
 		hp: 2
 	}
 }
@@ -120,7 +120,7 @@ function Stage(id, data, stageList) {
 		for(i in enemyList) {
 			enemyId = enemyList[i]
 			enemyData = Enemy.templateFor(enemyId)
-			enemyData.x += i * 100
+			enemyData.x -= i * 100
 			console.log('i: '+i)
 			enemy = new Enemy(enemyData)
 //			sprite = enemy.getSprite()	

@@ -1,11 +1,11 @@
 var game = {
 	creatureHeight : 17,
 	playerSpeed : 2,
-	groundX : 200,
+	groundX : 5,
 	groundY : 310,
-	groundWidth : 490,
-	groundHeight : 10,
-	gameAreaMinX : 10,
+	groundWidth : 890,
+	groundHeight : 5,
+	gameAreaMinX : 5,
 	gameAreaMaxX : 890,
 	gameAreaMinY : 10,
 	gameAreaMaxY : 490,
@@ -287,7 +287,7 @@ function GameState() {
 		currentStage = game.stageList.currentStage()
 		
 		game.player = new Player({
-			x : 20,
+			x : 100,
 			speed : game.playerSpeed
 		})
 		game.player.can_fire = true
@@ -301,11 +301,9 @@ function GameState() {
 		// Clear screen
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
-		// jaws.context.globalAlpha = 0.25
 		background.draw()
-		// jaws.context.globalAlpha = 1
 
-		this.drawGround()
+//		this.drawGround()
 		game.player.draw()
 		enemies.draw()
 		playerProjectiles.draw()
@@ -504,10 +502,12 @@ function GameOverState() {
 	this.setup = function() {
 		playSoundTag('fail')
 		jaws.on_keydown("esc", function() {
+			stopSound('fail')
 			jaws.switchGameState(MenuState)
 		})
 		jaws.preventDefaultKeys([ "enter" ])
 		jaws.on_keydown([ "enter" ], function() {
+			stopSound('fail')
 			jaws.switchGameState(MenuState)
 		})
 	}
@@ -525,6 +525,7 @@ function WinState() {
 		playSoundTag('win')
 		jaws.preventDefaultKeys([ "esc" ])
 		jaws.on_keydown([ "esc" ], function() {
+			stopSound('win')
 			jaws.switchGameState(MenuState)
 		})
 	}
