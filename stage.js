@@ -1,5 +1,5 @@
 function Enemy(options) {
-	options.x += game.groundX
+//	options.x += game.groundX
 	options.y = game.groundY - 25
 	options.width = 50
 	options.height = 48
@@ -59,6 +59,13 @@ Enemy.prototype.update = function() {
 	dxdy = direction_keys['left']
 	this.move(dxdy)
 }
+Enemy.bestiary = {
+	'red_angel' : {
+		'sprite' : 'angel3_50.png',
+		x : 650,
+		hp: 3
+	}
+}
 
 function Stage(id, data, stageList) {
 	this.id = id
@@ -83,15 +90,17 @@ function Stage(id, data, stageList) {
 	}
 	
 	this.enemies = function() {
+		var enemyId
+		var enemyData
+		var enemy
 		enemies = new jaws.SpriteList()
 		enemyList = this.enemyList()
 		for(i in enemyList) {
 			enemyId = enemyList[i]
-//			enemy = new Enemy(enemyId)
-			enemy = new Enemy({
-				x : 300,
-				hp : 3
-			})
+			enemyData = Enemy.bestiary[enemyId]
+			enemyData.x += i * 100
+			console.log('i: '+i)
+			enemy = new Enemy(enemyData)
 //			sprite = enemy.getSprite()	
 			enemies.push(enemy)
 		}
@@ -131,8 +140,11 @@ function StageList() {
 		'One':{
 			'levels':{
 				1: {
-					'enemies': ['red_angel']
-				}
+					'enemies': ['red_angel', 'red_angel']
+				},
+				2: {
+					'enemies': ['red_angel', 'red_angel']
+				},
 			}
 		},
 		'Two':{
