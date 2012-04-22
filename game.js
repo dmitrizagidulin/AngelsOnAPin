@@ -431,7 +431,7 @@ function MenuState() {
 				index = 0
 			}
 		})
-		jaws.on_keydown([ "enter", "space" ], function() {
+		jaws.on_keydown([ "enter"], function() {
 			jaws.switchGameState(GameState)
 		})
 	}
@@ -441,7 +441,7 @@ function MenuState() {
 
 		// Draw Title
 		drawText(45, "Black", "Angels on a Pin", 150, 150)
-
+		drawText(20, "Black", "[Enter]", 350, 300)
 	}
 }
 
