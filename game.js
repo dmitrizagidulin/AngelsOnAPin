@@ -11,7 +11,8 @@ var game = {
 	gameAreaMinY: 10,
 	gameAreaMaxY: 490,
 	gravity: 0.06,
-	backgroundColor: "#011451"
+	backgroundColor: "#011451",
+	stageList: new StageList()  // see stage.js
 }
 game.ground = new Thing({x: game.groundX, y: game.groundY, width: game.groundWidth, height: game.groundHeight})
 
@@ -390,6 +391,18 @@ function GameState() {
 		jaws.context.strokeRect(game.ground.x, game.ground.y, game.ground.width, game.ground.height)
 	}
 	
+	this.levelMarkCleared = function() {
+		currentStage = game.stageList.currentStage()
+		currentStage.nextLevelMarkCleared()
+		if(currentStage.isCleared()) {
+			jaws.switchGameState(StageClearedState)
+		} else {
+			// Stage not yet cleared, has more levels. 
+			jaws.switchGameState(GameState)
+		}
+		
+	}
+	
 	this.update = function() {
 		var player = game.player
 		var dxdy
@@ -430,6 +443,9 @@ function GameState() {
 		if (!player.isAlive()) {
 			jaws.switchGameState(GameOverState)
 		}
+		if(enemies.length == 0) {
+			this.levelMarkCleared()
+		}
 	}
 }
 
@@ -439,6 +455,7 @@ function GameState() {
  */
 function MenuState() {
 	this.setup = function() {
+		game.stageList.resetStages()
 		index = 0
 		jaws.on_keydown([ "down", "s" ], function() {
 			index++;
@@ -453,7 +470,7 @@ function MenuState() {
 			}
 		})
 		jaws.on_keydown([ "enter"], function() {
-			jaws.switchGameState(GameState)
+			jaws.switchGameState(StageReadyState)
 		})
 	}
 
@@ -464,6 +481,58 @@ function MenuState() {
 		// Draw Title
 		drawText(45, "White", "Angels on a Pin", 150, 150)
 		drawText(20, "White", "[Enter]", 350, 300)
+	}
+}
+
+function StageReadyState() {
+	var index = 0
+	var items = []
+	
+	this.setup = function() {
+		stageList = game.stageList
+		if(stageList.allStagesClear()) {
+			jaws.switchGameState(WinState)
+		}
+		jaws.preventDefaultKeys(["enter", "esc"])
+		jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
+		
+		var result = stageList.nextStage()
+		if(result) {
+			jaws.on_keydown(["enter"],  function()  {
+				jaws.switchGameState(GameState) 
+			})
+		} else {
+			// No more stages
+		}
+	}
+	
+	this.draw = function() {
+		jaws.context.fillStyle = game.backgroundColor
+		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
+		var txt = 'Chapter '+ game.stageList.currentStageId()
+		drawText(25, "White", txt, 150, 75)
+		drawText(15, "White", "Prepare for Battle!", 150, 150)
+		drawText(10, "White", "[Enter]", 150, 200)
+	}
+}
+
+function StageClearedState() {
+	this.setup = function() {
+		if(game.stageList.allStagesClear()) {
+			jaws.switchGameState(WinState)
+		}
+		jaws.on_keydown("esc",  function() { jaws.switchGameState(MenuState) })
+		jaws.preventDefaultKeys(["enter"])
+		jaws.on_keydown(["enter"],  function()  { 
+			jaws.switchGameState(StageReadyState) 
+		})
+	}
+	
+	this.draw = function() {
+		jaws.context.fillStyle = game.backgroundColor
+		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
+		drawText(15, "White", "Stage Cleared!", 75, 100)
+		drawText(10, "White", "(press Enter to continue)", 75, 160)
 	}
 }
 
@@ -484,6 +553,23 @@ function GameOverState() {
 		drawText(20, "Red", "(press Enter to restart)", 225, 300)
 	}
 }
+function WinState() {
+	this.setup = function() {
+		jaws.preventDefaultKeys(["esc"])
+		jaws.on_keydown(["esc"],  function()  { 
+			jaws.switchGameState(MenuState) 
+		})
+	}
+	
+	this.draw = function() {
+		jaws.context.fillStyle = game.backgroundColor
+		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
+		var y = 70, row = 30
+		drawText(12, "White", "You win.", 75, y)
+		y += row
+	}
+}
+
 function initAssets() {
 	jaws.assets.add("background2.png")
 	jaws.assets.add("seal1.png")
