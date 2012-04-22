@@ -1,3 +1,64 @@
+function Enemy(options) {
+	options.x += game.groundX
+	options.y = game.groundY - 25
+	options.width = 50
+	options.height = 48
+	Thing.call(this, options) // Use parent's constructor
+	this._name = 'Enemy Angel'
+	this.touchDamage = 1
+	this.isEnemy = true
+	this.speed = 1
+
+	this.sprite = new jaws.Sprite({
+		image : "angel3_50.png",
+		x : options.x,
+		y : options.y,
+		anchor : "center"
+	});
+
+	this.collision = false
+}
+Object.extend(Enemy, Thing)
+
+Enemy.prototype.damageTo = function(thing) {
+	var damage = 0
+	if (thing.isPlayer) {
+		damage = this.touchDamage
+	}
+	return damage
+}
+
+Enemy.prototype.draw = function() {
+	// drawText(20, 'Red', 'A', this.rect().x, this.rect().bottom)
+	this.sprite.draw()
+	var txt = 'Pride: ' + this.hp
+	drawText(8, 'Red', txt, this.rect().x + 3, this.rect().y - 2)
+}
+
+Enemy.prototype.doCollideWith = function(thing) {
+	if (thing.damageTo) {
+		damage = thing.damageTo(this)
+	} else {
+		damage = 0
+	}
+	this.takeDamageFrom(damage, thing)
+	this.collision = true
+}
+Enemy.prototype.isAlive = function() {
+	return this.hp > 0
+}
+Enemy.prototype.move = function(dxdy) {
+	dx = dxdy.x * this.speed
+	dy = dxdy.y * this.speed
+	this.sprite.move(dx, dy);
+}
+Enemy.prototype.rect = function() {
+	return this.sprite.rect()
+}
+Enemy.prototype.update = function() {
+	dxdy = direction_keys['left']
+	this.move(dxdy)
+}
 
 function Stage(id, data, stageList) {
 	this.id = id
