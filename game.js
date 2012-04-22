@@ -73,6 +73,9 @@ Thing.prototype.move = function(dxdy) {
 		this.rect().move(dx, dy);
 	}
 }
+Thing.prototype.name = function() {
+	return this._name || 'Thing';
+}
 Thing.prototype.rect = function() {
 	if(this.sprite) {
 		return this.sprite.rect()
@@ -92,7 +95,7 @@ function Projectile(options) {
 	Thing.call(this, options) // Use parent's constructor
 	this.startX = options.x
 	this.startY = options.y
-	this.speed_vector = options.speed_vector
+	this.speed_vector = {x:options.speed_vector.x, y:options.speed_vector.y}
 	this.range = options.range
 	this.affectedByGravity = options.affectedByGravity
 	this.collision = false
@@ -121,6 +124,9 @@ Projectile.prototype.isAlive = function() {
 Projectile.prototype.isInRange = function() {
 	return this.rect().x < (this.startX + this.range)
 }
+Projectile.prototype.logFired = function() {
+	console.log(this.name() + ' fired! Init vector: x='+this.speed_vector.x + ', y='+this.speed_vector.y)
+}
 Projectile.prototype.move = function() {
 	if(this.affectedByGravity) {
 		this.speed_vector.y += game.gravity
@@ -142,6 +148,7 @@ Projectile.isOutsideRange = function(item) {
 	return isOutsideRange
 }
 function Seal(options) {
+	this._name = 'Golden Seal'
 	options.height = 49
 	options.width = 49  // sprite 
 	options.y = game.ground.rect().y - options.height - 1
@@ -155,8 +162,10 @@ function Seal(options) {
 Object.extend(Seal, Projectile)
 
 function Dash(options) {
+	this._name = 'Angelic Arrow'
 	options.height = 4
 	options.width = 14
+	options.y = game.ground.rect().y - options.height - 1
 	Projectile.call(this, options)
 	this.draw = function() {
 		drawText(20, 'Teal', '-', this.rect().x - 1, this.rect().bottom + 5)
@@ -182,15 +191,17 @@ function Weapon(options) {
 	this.affectedByGravity = options.affectedByGravity
 	this.damage = options.damage
 	this.speed = 1
+	this.initialVector = options.initialVector
+	this._name = options.name
 	
 	this.projectile = function(owner) {
 		var projectile = new this.projectileType({
 			x : owner.rect().right - (owner.rect().width / 2),
 //			y : owner.y,
-			speed_vector: {x: this.speed, y: -4},
+			speed_vector: this.initialVector,
 			affectedByGravity: this.affectedByGravity,
 			damage: this.damage,
-			range: 600 //this.range
+			range: this.range
 		})
 		return projectile
 	}
@@ -198,18 +209,23 @@ function Weapon(options) {
 
 var allWeapons = {
 	SealWeapon : new Weapon({
+		name: 'Golden Seal',
 		speed : 2,
-		range : 50,
+		range : 300,
 		damage: 1,
 		cooldown : 300,
 		affectedByGravity: true,
+		initialVector: {x: 2, y: -4},
 		projectileType : Seal
 	}),
 	DashWeapon : new Weapon({
+		name: 'Angelic Bow',
 		speed : 3,
 		range : 500,
+		damage: 1,
 		cooldown : 300,
 		affectedByGravity: true,
+		initialVector: {x: 2, y: -4},
 		projectileType : Dash
 	}),
 	ExWeapon : new Weapon({
@@ -228,7 +244,8 @@ function Player(options) {
 	options.width = 50
 	options.height = 51
 	Thing.call(this, options) // Use parent's constructor
-
+	this._name = 'Player'
+	
 	this.sprite = new jaws.Sprite({image: "angel2_50.png", x: options.x, y: options.y,
 		anchor: "center"});
 	
@@ -256,6 +273,7 @@ function Enemy(options) {
 	options.width = 50
 	options.height = 48
 	Thing.call(this, options) // Use parent's constructor
+	this._name = 'Enemy Angel'
 	
 	this.sprite = new jaws.Sprite({image: "angel3_50.png", x: options.x, y: options.y,
 		anchor: "center"});
@@ -271,9 +289,6 @@ function Enemy(options) {
 }
 Object.extend(Enemy, Thing)
 
-Enemy.prototype.name = function() {
-	return 'Enemy Angel';
-}
 Enemy.prototype.isEnemy = true
 
 Enemy.prototype.move = function(dxdy) {
@@ -372,6 +387,7 @@ function GameState() {
 		if (jaws.pressed("space")) {
 			if(player.can_fire) {
 				bullet = player.weapon.projectile(player)
+				bullet.logFired()
 				playerProjectiles.push(bullet)
 				player.can_fire = false
 				setTimeout(function() { game.player.can_fire = true }, game.player.weapon.cooldown)
