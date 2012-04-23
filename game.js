@@ -254,7 +254,7 @@ function GameState() {
 	var playerMoved = false
 	
 	var background = new jaws.Sprite({
-		image : "background1.png",
+		image : "background2.png",
 		x : 0,
 		y : 0
 	})
@@ -416,7 +416,7 @@ function MenuState() {
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 
 		// Draw Title
-		drawText(45, "White", "Angels on a Pin", 150, 150)
+		drawText(45, "White", "Angels on a Pin", 200, 150)
 		drawText(20, "White", "[Enter]", 350, 300)
 	}
 }
@@ -441,15 +441,17 @@ function IntroState() {
 		y += row
 		drawText(size, "White", '"How many angels can dance on the head of a pin?"', 75, y)
 		y += row
-		drawText(size, "White", "This is mere fragments of mortal memory.", 75, y)
+		drawText(size, "White", "This is a mere fragment of mortal memory.", 75, y)
 		y += row
 		drawText(size, "White", "When the War in Heaven started,", 75, y)
 		y += row
 		drawText(size, "White", "the first Battle was fought", 75, y)
 		y += row
-		drawText(size, "White", "beyond an incomprehensible dimensonal vortex", 75, y)
+		drawText(size, "White", "beyond an incomprehensible dimensional vortex", 75, y)
 		y += row
 		drawText(size, "White", "vaguely reminiscent of a Pin.", 75, y)
+		y += row
+		drawText(10, "White", "[Enter to continue]", 75, y)
 	}
 }
 
@@ -575,7 +577,7 @@ function WinState() {
 }
 
 function initAssets() {
-	jaws.assets.add("background1.png")
+	jaws.assets.add("background2.png")
 	jaws.assets.add("seal1.png")
 	jaws.assets.add("angel2_50.png")
 	jaws.assets.add("angel3_50.png")

@@ -7,7 +7,7 @@
  * @param y
  */
 	function drawText(fontSize, fillColor, text, x, y) {
-		jaws.context.font = "bold "+fontSize+"pt courier";
+		jaws.context.font = "bold "+fontSize+"pt serif";
 		jaws.context.lineWidth = 10
 		jaws.context.fillStyle =  fillColor
 		jaws.context.strokeStyle =  "rgba(200, 200, 200, 0.0)"

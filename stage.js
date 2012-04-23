@@ -76,7 +76,7 @@ Enemy.bestiary = {
 	red_angel: {
 		sprite: 'angel3_50.png',
 		x: 750,
-		hp: 2
+		hp: 3
 	}
 }
 Enemy.templateFor = function(enemyId) {
@@ -156,7 +156,8 @@ function StageList() {
 	this.currentStageIdx = 0
 	this.stages = {
 		1: 'One',
-//		2: 'Two'
+		2: 'Two',
+		3: 'Three'
 	}
 	this.stageData = {
 		'One':{
@@ -166,13 +167,20 @@ function StageList() {
 				}
 			}
 		},
-//		'Two':{
-//			'levels':{
-//				1: {
-//					'enemies': ['red_angel', 'red_angel']
-//				}
-//			}
-//		}
+		'Two':{
+			'levels':{
+				1: {
+					'enemies': ['red_angel', 'red_angel']
+				}
+			}
+		},
+		'Three':{
+			'levels':{
+				1: {
+					'enemies': ['red_angel', 'red_angel', 'red_angel']
+				}
+			}
+		}
 	}
 	this.currentStageObj = null
 	this.stagesCleared = {}
