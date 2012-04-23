@@ -407,7 +407,7 @@ function MenuState() {
 		})
 		jaws.on_keydown([ "enter" ], function() {
 			stopSound('start')
-			jaws.switchGameState(StageReadyState)
+			jaws.switchGameState(IntroState)
 		})
 	}
 
@@ -418,6 +418,38 @@ function MenuState() {
 		// Draw Title
 		drawText(45, "White", "Angels on a Pin", 150, 150)
 		drawText(20, "White", "[Enter]", 350, 300)
+	}
+}
+
+function IntroState() {
+	this.setup = function() {
+		jaws.preventDefaultKeys([ "esc", "enter" ])
+		jaws.on_keydown([ "esc" ], function() {
+			jaws.switchGameState(MenuState)
+		})
+		jaws.on_keydown([ "enter" ], function() {
+			jaws.switchGameState(StageReadyState)
+		})
+	}
+
+	this.draw = function() {
+		jaws.context.fillStyle = game.backgroundColor
+		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
+		var y = 70, row = 30
+		var size = 13
+		drawText(size, "White", "You've heard the question", 75, y)
+		y += row
+		drawText(size, "White", '"How many angels can dance on the head of a pin?"', 75, y)
+		y += row
+		drawText(size, "White", "This is mere fragments of mortal memory.", 75, y)
+		y += row
+		drawText(size, "White", "When the War in Heaven started,", 75, y)
+		y += row
+		drawText(size, "White", "the first Battle was fought", 75, y)
+		y += row
+		drawText(size, "White", "beyond an incomprehensible dimensonal vortex", 75, y)
+		y += row
+		drawText(size, "White", "vaguely reminiscent of a Pin.", 75, y)
 	}
 }
 
@@ -437,14 +469,11 @@ function StageReadyState() {
 
 		var result = stageList.nextStage()
 		if (result) {
-			console.log('In StageReadyState. Next stage selected: Chapter '
-					+ game.stageList.currentStageId())
 			jaws.on_keydown([ "enter" ], function() {
 				stopSound('horn')
 				jaws.switchGameState(GameState)
 			})
 		} else {
-			console.log('In StageReadyStage. No more stages')
 			// No more stages
 		}
 	}
@@ -454,8 +483,9 @@ function StageReadyState() {
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 		var txt = 'Chapter ' + game.stageList.currentStageId()
 		drawText(25, "White", txt, 150, 75)
-		drawText(15, "White", "Prepare for Battle!", 150, 150)
+		drawText(15, "White", "Destroy all rebel angels!", 150, 150)
 		drawText(10, "White", "[Enter]", 150, 200)
+		drawText(8, "White", "Left and Right to move, Space to fire.", 150, 230)
 	}
 }
 
