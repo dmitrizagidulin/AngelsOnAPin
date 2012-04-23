@@ -145,16 +145,6 @@ function Dash(options) {
 }
 Object.extend(Dash, Projectile)
 
-function Ex(options) {
-	options.height = 4
-	options.width = 14
-	Projectile.call(this, options)
-	this.draw = function() {
-		drawText(20, 'Pink', 'x', this.rect().x - 1, this.rect().bottom + 5)
-	}
-}
-Object.extend(Ex, Projectile)
-
 function Weapon(options) {
 	this.speed = options.speed
 	this.range = options.range
@@ -205,14 +195,6 @@ var allWeapons = {
 		cooldown : 300,
 		affectedByGravity : true,
 		projectileType : Dash
-	}),
-	ExWeapon : new Weapon({
-		speed : 3,
-		range : 10000,
-		cooldown : 300,
-		affectedByGravity : false,
-		ricochets : true,
-		projectileType : Ex
 	})
 }
 
@@ -540,8 +522,25 @@ function WinState() {
 		jaws.context.fillStyle = game.backgroundColor
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 		var y = 70, row = 30
-		drawText(12, "White", "You win.", 75, y)
+		drawText(15, "White", "You have won this battle.", 75, y)
 		y += row
+		drawText(15, "White", "The rebel angels have been sealed away.", 75, y)
+		y += row
+		drawText(15, "White", "They bide their time, beyond the strange", 75, y)
+		y += row
+		drawText(15, "White", "event horizon of The Pin.", 75, y)
+		y += row
+		drawText(15, "White", "Until the day the war begins anew.", 75, y)
+		y += row
+		y += row
+		drawText(15, "White", "The End.", 75, y)
+		y += row
+		y += row
+		drawText(11, "White", "Many Thanks to:", 75, y)
+		y += row
+		drawText(10, "White", "Cat Valente", 75, y)
+		y += row
+		drawText(10, "White", "Johnicholas Hines", 75, y)
 	}
 }
 

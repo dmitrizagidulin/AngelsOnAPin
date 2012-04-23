@@ -156,7 +156,7 @@ function StageList() {
 	this.currentStageIdx = 0
 	this.stages = {
 		1: 'One',
-		2: 'Two'
+//		2: 'Two'
 	}
 	this.stageData = {
 		'One':{
@@ -166,13 +166,13 @@ function StageList() {
 				}
 			}
 		},
-		'Two':{
-			'levels':{
-				1: {
-					'enemies': ['red_angel', 'red_angel']
-				}
-			}
-		}
+//		'Two':{
+//			'levels':{
+//				1: {
+//					'enemies': ['red_angel', 'red_angel']
+//				}
+//			}
+//		}
 	}
 	this.currentStageObj = null
 	this.stagesCleared = {}
