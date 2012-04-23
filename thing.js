@@ -25,10 +25,12 @@ Thing.prototype.drawRect = function() {
 	}
 }
 Thing.prototype.knockBack = function(dx) {
-	this.move({
-		x : -dx,
-		y : 0
-	})
+	if(this.rect().x > game.gameAreaMinX) { 
+		this.move({
+			x : -dx,
+			y : 0
+		})
+	}
 }
 Thing.prototype.move = function(dxdy) {
 	dx = dxdy.x * this.speed

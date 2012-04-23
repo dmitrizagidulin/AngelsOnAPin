@@ -317,8 +317,10 @@ function GameState() {
 		var dxdy
 		if (jaws.pressed("left")) {
 			playerMoved = true
-			dxdy = direction_keys['left']
-			player.move(dxdy)
+			if(player.rect().x > game.gameAreaMinX) {
+				dxdy = direction_keys['left']
+				player.move(dxdy)
+			}
 		}
 		if (jaws.pressed("right")) {
 			playerMoved = true
@@ -536,7 +538,7 @@ function GameOverState() {
 		jaws.context.fillRect(0, 0, jaws.width, jaws.height)
 
 		drawText(40, "Red", "Game Over!", 250, 150)
-		drawText(20, "Red", "(press Enter to restart)", 225, 300)
+		drawText(20, "Red", "[Enter to restart]", 300, 300)
 	}
 }
 function WinState() {
